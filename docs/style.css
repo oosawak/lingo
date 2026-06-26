@@ -209,10 +209,20 @@ h1 {
   margin-top: 18px;
 }
 
+.language-pair {
+  grid-column: span 6;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .field {
-  grid-column: span 3;
   display: grid;
   gap: 8px;
+}
+
+.translator-panel > .field {
+  grid-column: span 3;
 }
 
 .field-wide {
@@ -310,10 +320,15 @@ h1 {
     grid-template-columns: 1fr;
   }
 
+  .language-pair,
   .field,
   .field-wide,
   .submit-btn {
     grid-column: auto;
+  }
+
+  .language-pair {
+    grid-template-columns: 1fr;
   }
 
   .section-head {

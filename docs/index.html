@@ -51,25 +51,39 @@
             <p class="section-kicker">Demo</p>
             <h2>WASM 翻訳チャットの入口</h2>
           </div>
-          <span class="pill" id="wasm-status">WASM: booting</span>
+          <div class="engine-badges">
+            <span class="pill" id="engine-status">engine: wasm</span>
+            <span class="pill" id="wasm-status">WASM: booting</span>
+          </div>
         </div>
 
         <div class="translator-panel">
           <label class="field">
-            <span>From</span>
-            <select id="lang-from">
-              <option value="ja" selected>日本語</option>
-              <option value="en">英語</option>
+            <span>Engine</span>
+            <select id="engine-select">
+              <option value="wasm" selected>WASM</option>
+              <option value="transformers">Transformers.js</option>
+              <option value="auto">Auto</option>
             </select>
           </label>
 
-          <label class="field">
-            <span>To</span>
-            <select id="lang-to">
-              <option value="en" selected>英語</option>
-              <option value="ja">日本語</option>
-            </select>
-          </label>
+          <div class="language-pair">
+            <label class="field">
+              <span>From</span>
+              <select id="lang-from">
+                <option value="ja" selected>日本語</option>
+                <option value="en">英語</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>To</span>
+              <select id="lang-to">
+                <option value="en" selected>英語</option>
+                <option value="ja">日本語</option>
+              </select>
+            </label>
+          </div>
 
           <label class="field field-wide">
             <span>Message</span>
