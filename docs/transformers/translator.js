@@ -7,10 +7,9 @@ const PIPELINE_OPTIONS = {
   dtype: 'q8',
 };
 
-const MODEL_ID = 'Xenova/nllb-200-distilled-600M';
-const LANGUAGE_CODES = {
-  ja: 'jpn_Jpan',
-  en: 'eng_Latn',
+const MODEL_CANDIDATES = {
+  'ja|en': ['Xenova/opus-mt-ja-en'],
+  'en|ja': ['Xenova/opus-mt-en-ja'],
 };
 
 const pipelineCache = new Map();
@@ -33,9 +32,20 @@ async function loadTranslator(from, to) {
     return pipelineCache.get(key);
   }
 
-  const translator = await pipeline('translation', MODEL_ID, PIPELINE_OPTIONS);
-  pipelineCache.set(key, translator);
-  return translator;
+  const candidates = MODEL_CANDIDATES[key] ?? [];
+  let lastError = null;
+
+  for (const modelId of candidates) {
+    try {
+      const translator = await pipeline('translation', modelId, PIPELINE_OPTIONS);
+      pipelineCache.set(key, translator);
+      return translator;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError ?? new Error(`No translation model available for ${key}`);
 }
 
 function extractTranslation(result) {
@@ -67,10 +77,7 @@ export async function translate(text, from, to) {
   }
 
   const translator = await loadTranslator(src, dst);
-  const result = await translator(text, {
-    src_lang: LANGUAGE_CODES[src],
-    tgt_lang: LANGUAGE_CODES[dst],
-  });
+  const result = await translator(text);
 
   return extractTranslation(result);
 }
