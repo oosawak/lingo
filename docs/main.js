@@ -13,7 +13,7 @@ let transformersModule = null;
 
 const ENGINE_STORAGE_KEY = 'lingo.translation.engine';
 const ENGINE_QUERY_KEY = 'engine';
-const DEFAULT_ENGINE = 'wasm';
+const DEFAULT_ENGINE = 'transformers';
 
 function resolveInitialEngine() {
   const query = new URLSearchParams(window.location.search);
@@ -91,6 +91,7 @@ async function loadTransformers() {
       await mod.init();
     }
     transformersModule = mod;
+    wasmStatus.textContent = 'Transformers.js: ready';
     return transformersModule;
   } catch (error) {
     console.warn('[lingo] Transformers engine is not available yet:', error);
@@ -115,10 +116,14 @@ async function translateWithTransformers(text, from, to) {
 }
 
 async function translateAuto(text, from, to) {
-  const transformerResult = await loadTransformers();
-  if (transformerResult?.translate) {
-    setEngineStatus('auto', 'transformers');
-    return await transformerResult.translate(text, from, to);
+  try {
+    const transformerResult = await loadTransformers();
+    if (transformerResult?.translate) {
+      setEngineStatus('auto', 'transformers');
+      return await transformerResult.translate(text, from, to);
+    }
+  } catch (error) {
+    console.warn('[lingo] Auto mode fell back to WASM:', error);
   }
 
   setEngineStatus('auto', 'wasm');
@@ -129,7 +134,12 @@ async function translate(text, from, to) {
   const engine = engineSelect.value;
   if (engine === 'transformers') {
     setEngineStatus('transformers');
-    return await translateWithTransformers(text, from, to);
+    try {
+      return await translateWithTransformers(text, from, to);
+    } catch (error) {
+      setEngineStatus('transformers', 'fallback: wasm');
+      return await translateWithWasm(text, from, to);
+    }
   }
 
   if (engine === 'auto') {
@@ -161,7 +171,7 @@ async function handleTranslate() {
 
 translateBtn.addEventListener('click', handleTranslate);
 loadWasmBtn.addEventListener('click', () => {
-  void loadWasm().catch(() => {});
+  void loadTransformers().catch(() => {});
 });
 
 messageInput.addEventListener('keydown', (event) => {
@@ -191,6 +201,7 @@ toSelect.addEventListener('change', () => {
 engineSelect.value = resolveInitialEngine();
 setEngineStatus(engineSelect.value);
 addBubble('ここが lingo の公開ページです。', 'left', 'System');
-addBubble('翻訳は Rust/WASM 側で実行します。', 'left', 'System');
+addBubble('既定エンジンは Transformers.js です。', 'left', 'System');
 
 void loadWasm().catch(() => {});
+void loadTransformers().catch(() => {});

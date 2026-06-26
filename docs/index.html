@@ -19,7 +19,7 @@
 
         <div class="hero-actions">
           <button class="primary-btn" id="load-wasm-btn" type="button">
-            WASM 翻訳を起動
+            Transformers.js を起動
           </button>
           <a class="secondary-link" href="#translator">翻訳デモへ</a>
         </div>
@@ -49,10 +49,10 @@
         <div class="section-head">
           <div>
             <p class="section-kicker">Demo</p>
-            <h2>WASM 翻訳チャットの入口</h2>
+            <h2>Transformers.js 翻訳チャットの入口</h2>
           </div>
           <div class="engine-badges">
-            <span class="pill" id="engine-status">engine: wasm</span>
+            <span class="pill" id="engine-status">engine: transformers</span>
             <span class="pill" id="wasm-status">WASM: booting</span>
           </div>
         </div>
@@ -61,8 +61,8 @@
           <label class="field">
             <span>Engine</span>
             <select id="engine-select">
-              <option value="wasm" selected>WASM</option>
-              <option value="transformers">Transformers.js</option>
+              <option value="transformers" selected>Transformers.js</option>
+              <option value="wasm">WASM fallback</option>
               <option value="auto">Auto</option>
             </select>
           </label>
@@ -85,10 +85,12 @@
             </label>
           </div>
 
-          <label class="field field-wide">
-            <span>Message</span>
+          <div class="message-row">
+            <label class="field message-label" for="message-input">
+              <span>Message</span>
+            </label>
             <input id="message-input" type="text" placeholder="例: こんにちは、WASM で翻訳したい" />
-          </label>
+          </div>
 
           <button class="primary-btn submit-btn" id="translate-btn" type="button">
             送信
