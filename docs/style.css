@@ -229,6 +229,28 @@ h1 {
   grid-column: 1 / -1;
 }
 
+.message-row {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+}
+
+.message-row input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--panel-strong);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 14px 14px;
+  outline: none;
+}
+
+.message-row input:focus {
+  border-color: rgba(120, 211, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(77, 184, 255, 0.18);
+}
+
 .field span {
   font-size: 0.78rem;
   letter-spacing: 0.06em;
