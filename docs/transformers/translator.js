@@ -10,11 +10,9 @@ const PIPELINE_OPTIONS = {
 const MODEL_CANDIDATES = {
   'ja|en': [
     'Xenova/opus-mt-ja-en',
-    'Helsinki-NLP/opus-mt-ja-en',
   ],
   'en|ja': [
     'Xenova/opus-mt-en-ja',
-    'Helsinki-NLP/opus-mt-en-ja',
   ],
 };
 
