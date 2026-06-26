@@ -48,18 +48,18 @@ async function loadWasm() {
     wasmStatus.textContent = 'WASM: ready';
     return wasmModule;
   } catch (error) {
-    console.warn('[lingo] WASM module is not available yet:', error);
-    wasmStatus.textContent = 'WASM: fallback';
-    return null;
+    console.error('[lingo] WASM module load failed:', error);
+    wasmStatus.textContent = 'WASM: unavailable';
+    throw error;
   }
 }
 
 async function translate(text, from, to) {
   const mod = await loadWasm();
-  if (mod?.translate) {
-    return await mod.translate(text, from, to);
+  if (typeof mod.translate !== 'function') {
+    throw new Error('WASM translation export not found');
   }
-  return `[${langLabel(from)} -> ${langLabel(to)}] ${text}`;
+  return await mod.translate(text, from, to);
 }
 
 async function handleTranslate() {
@@ -72,8 +72,13 @@ async function handleTranslate() {
   addBubble(text, 'right', `You · ${langLabel(from)}`);
   messageInput.value = '';
 
-  const translated = await translate(text, from, to);
-  addBubble(translated, 'left', `WASM · ${langLabel(to)}`);
+  try {
+    const translated = await translate(text, from, to);
+    addBubble(translated, 'left', `WASM · ${langLabel(to)}`);
+  } catch (error) {
+    addBubble('WASM の読み込みに失敗しました。', 'left', 'System');
+    console.error(error);
+  }
 }
 
 translateBtn.addEventListener('click', handleTranslate);
@@ -101,4 +106,6 @@ toSelect.addEventListener('change', () => {
 });
 
 addBubble('ここが lingo の公開ページです。', 'left', 'System');
-addBubble('WASM が入ると、翻訳ロジックを Rust 側へ移せます。', 'left', 'System');
+addBubble('翻訳は Rust/WASM 側で実行します。', 'left', 'System');
+
+void loadWasm().catch(() => {});

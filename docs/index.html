@@ -19,7 +19,7 @@
 
         <div class="hero-actions">
           <button class="primary-btn" id="load-wasm-btn" type="button">
-            WASM を読み込む
+            WASM 翻訳を起動
           </button>
           <a class="secondary-link" href="#translator">翻訳デモへ</a>
         </div>
@@ -40,8 +40,8 @@
 
         <article class="status-card">
           <div class="status-label">WASM</div>
-          <h2>読み込み口を main.js に設置</h2>
-          <p>未ビルド時はダミー翻訳で動き、後から Rust 側へ差し替え可能です。</p>
+          <h2>翻訳処理を Rust/WASM に集約</h2>
+          <p>ブラウザーは入出力だけを担当し、翻訳ロジックは WASM 側に置きます。</p>
         </article>
       </section>
 
@@ -49,9 +49,9 @@
         <div class="section-head">
           <div>
             <p class="section-kicker">Demo</p>
-            <h2>翻訳チャットの入口</h2>
+            <h2>WASM 翻訳チャットの入口</h2>
           </div>
-          <span class="pill" id="wasm-status">WASM: idle</span>
+          <span class="pill" id="wasm-status">WASM: booting</span>
         </div>
 
         <div class="translator-panel">
@@ -86,8 +86,8 @@
 
       <section class="footnote">
         <p>
-          WASM の本体は後で `docs/wasm/` 配下に置く想定です。
-          いまは JS 側で安全にフォールバックします。
+          WASM の本体は `docs/wasm/` 配下に配置します。
+          ブラウザーは Rust/WASM が返した翻訳結果をそのまま表示します。
         </p>
       </section>
     </main>
