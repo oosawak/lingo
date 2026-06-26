@@ -65,6 +65,7 @@ select {
 
 .hero,
 .status-card,
+.lobby,
 .translator,
 .footnote {
   border: 1px solid var(--line);
@@ -158,37 +159,23 @@ h1 {
   transform: translateY(-1px);
 }
 
-.status-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 18px;
-}
-
-.status-card {
-  border-radius: 22px;
-  padding: 20px;
-}
-
-.status-label,
 .section-kicker {
   color: var(--accent-alt);
   margin-bottom: 10px;
 }
 
-.status-card h2,
 .translator h2 {
   font-size: 1.1rem;
   line-height: 1.3;
 }
 
-.status-card p,
 .footnote p {
   margin-top: 10px;
   color: var(--muted);
   line-height: 1.7;
 }
 
+.lobby,
 .translator {
   margin-top: 18px;
   border-radius: 28px;
@@ -202,18 +189,184 @@ h1 {
   gap: 16px;
 }
 
-.translator-panel {
+.engine-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.room-actions-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.room-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.logout-btn {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.call-btn,
+.hangup-btn {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.lobby-panel {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 12px;
   margin-top: 18px;
 }
 
-.language-pair {
+.lobby-panel > .field {
   grid-column: span 6;
+}
+
+.lobby-panel .submit-btn {
+  grid-column: 1 / -1;
+}
+
+.chat-shell {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.participant-panel {
+  border-radius: 22px;
+  padding: 18px;
+  background: rgba(8, 17, 31, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.participant-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: start;
+}
+
+.participant-head h3 {
+  margin-top: 4px;
+  font-size: 1rem;
+}
+
+.participant-note {
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-align: right;
+}
+
+.participant-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.participant-empty {
+  padding: 14px 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.participant-item {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.participant-item strong,
+.participant-item span {
+  display: block;
+}
+
+.participant-item span {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.participant-item.active {
+  border-color: rgba(120, 211, 255, 0.55);
+  background: rgba(77, 184, 255, 0.12);
+}
+
+.participant-item:hover {
+  transform: translateY(-1px);
+}
+
+.chat-main {
+  min-width: 0;
+}
+
+.draw-shell {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 17, 31, 0.42);
+}
+
+.draw-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 12px;
+  margin-bottom: 12px;
+}
+
+.draw-head h3 {
+  margin-top: 4px;
+  font-size: 1rem;
+}
+
+.draw-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.draw-clear-btn {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.draw-canvas {
+  display: block;
+  width: 100%;
+  height: 220px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    rgba(4, 9, 18, 0.92);
+  background-size: 24px 24px, 24px 24px, auto;
+}
+
+.chat-composer {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 18px;
+  flex-wrap: wrap;
 }
 
 .field {
@@ -221,16 +374,8 @@ h1 {
   gap: 8px;
 }
 
-.translator-panel > .field {
-  grid-column: span 3;
-}
-
-.field-wide {
-  grid-column: 1 / -1;
-}
-
 .message-row {
-  grid-column: 1 / -1;
+  flex: 1 1 320px;
   display: grid;
   gap: 8px;
 }
@@ -276,8 +421,7 @@ h1 {
 }
 
 .submit-btn {
-  grid-column: span 2;
-  align-self: end;
+  flex: 0 0 auto;
 }
 
 .chat-log {
@@ -337,24 +481,25 @@ h1 {
 }
 
 @media (max-width: 900px) {
-  .status-grid,
-  .translator-panel {
+  .lobby-panel {
     grid-template-columns: 1fr;
   }
 
-  .language-pair,
-  .field,
-  .field-wide,
-  .submit-btn {
+  .lobby-panel > .field,
+  .lobby-panel .submit-btn {
     grid-column: auto;
-  }
-
-  .language-pair {
-    grid-template-columns: 1fr;
   }
 
   .section-head {
     flex-direction: column;
+  }
+
+  .room-actions {
+    align-items: flex-start;
+  }
+
+  .chat-shell {
+    grid-template-columns: 1fr;
   }
 }
 

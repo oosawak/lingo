@@ -4,12 +4,12 @@ env.allowRemoteModels = true;
 env.allowLocalModels = false;
 
 const PIPELINE_OPTIONS = {
-  dtype: 'q8',
+  dtype: 'fp32',
 };
 
 const MODEL_CANDIDATES = {
-  'ja|en': ['Xenova/opus-mt-ja-en'],
-  'en|ja': ['Xenova/opus-mt-en-ja'],
+  'ja|en': ['Xenova/nllb-200-distilled-600M'],
+  'en|ja': ['Xenova/nllb-200-distilled-600M'],
 };
 
 const pipelineCache = new Map();
@@ -77,7 +77,10 @@ export async function translate(text, from, to) {
   }
 
   const translator = await loadTranslator(src, dst);
-  const result = await translator(text);
+  const result = await translator(text, {
+    src_lang: src === 'ja' ? 'jpn_Jpan' : 'eng_Latn',
+    tgt_lang: dst === 'ja' ? 'jpn_Jpan' : 'eng_Latn',
+  });
 
   return extractTranslation(result);
 }
