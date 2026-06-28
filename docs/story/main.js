@@ -5,6 +5,7 @@ const chapterLabel = document.getElementById('chapter-label');
 const sceneLabel = document.getElementById('scene-label');
 const povLabel = document.getElementById('pov-label');
 const statusBadge = document.getElementById('status-badge');
+const nextBeatBadge = document.getElementById('next-beat-badge');
 const llmStatusBadge = document.getElementById('llm-status-badge');
 const nextSceneBtn = document.getElementById('next-scene-btn');
 const addLineBtn = document.getElementById('add-line-btn');
@@ -216,6 +217,7 @@ function createPlot(theme) {
     ],
     cast: ['You', 'Narrator'],
     currentBeat: '導入',
+    nextBeat: '未定',
   };
 }
 
@@ -260,6 +262,9 @@ function loadState() {
             currentBeat: typeof parsed.plot.currentBeat === 'string' && parsed.plot.currentBeat.trim()
               ? parsed.plot.currentBeat.trim()
               : '導入',
+            nextBeat: typeof parsed.plot.nextBeat === 'string' && parsed.plot.nextBeat.trim()
+              ? parsed.plot.nextBeat.trim()
+              : '未定',
           }
         : createPlot(typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '失われた街'),
     };
@@ -434,8 +439,10 @@ function buildStoryPrompt(userInput) {
 
   return [
     'あなたはブラウザー内で動作する物語生成 LLM です。',
-    '以下の設定と直前の会話を踏まえて、続きの物語を日本語で自然に書いてください。',
-    '出力は物語本文のみ。説明、箇条書き、JSON、前置きは不要です。',
+    '以下の設定と直前の会話を踏まえて、続きの物語を日本語で生成してください。',
+    '出力は必ず JSON のみ。説明、箇条書き、前置き、コードフェンスは不要です。',
+    '形式は次の通りです。',
+    '{"narration":"本文","next_beat":"次の展開","lore_hits":["発動した裏設定"],"dialogue_hint":"次に話すべき相手の要点"}',
     `- 文体: ${tone}`,
     `- 視点: ${viewpoint}`,
     `- テンポ: ${tempo}`,
@@ -484,7 +491,7 @@ function buildStoryPrompt(userInput) {
     '【今回の入力】',
     currentInput,
     '',
-    'この入力を受けて、次の一手だけを返してください。',
+    'この入力を受けて、上記 JSON を返してください。',
   ].join('\n');
 }
 
@@ -600,6 +607,9 @@ function renderHeader() {
   sceneLabel.textContent = `Scene ${state.scene}`;
   povLabel.textContent = state.pov;
   statusBadge.textContent = state.plot?.currentBeat ? `beat: ${state.plot.currentBeat}` : 'beat: idle';
+  if (nextBeatBadge) {
+    nextBeatBadge.textContent = state.plot?.nextBeat ? `next: ${state.plot.nextBeat}` : 'next: -';
+  }
 }
 
 function renderPlot() {
@@ -682,6 +692,40 @@ function cleanGeneratedStory(prompt, generatedText) {
   return text.replace(/^[:：\-\s]+/, '').trim();
 }
 
+function parseStoryGeneration(prompt, generatedText) {
+  const cleaned = cleanGeneratedStory(prompt, generatedText);
+  const unwrapped = cleaned
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+
+  try {
+    const parsed = JSON.parse(unwrapped);
+    if (parsed && typeof parsed === 'object') {
+      return {
+        narration: typeof parsed.narration === 'string' && parsed.narration.trim() ? parsed.narration.trim() : '',
+        nextBeat: typeof parsed.next_beat === 'string' && parsed.next_beat.trim() ? parsed.next_beat.trim() : '',
+        loreHits: Array.isArray(parsed.lore_hits)
+          ? parsed.lore_hits.filter((item) => typeof item === 'string' && item.trim()).map((item) => item.trim())
+          : [],
+        dialogueHint: typeof parsed.dialogue_hint === 'string' && parsed.dialogue_hint.trim() ? parsed.dialogue_hint.trim() : '',
+        raw: unwrapped,
+      };
+    }
+  } catch {
+    // Fall back to plain text below.
+  }
+
+  return {
+    narration: unwrapped,
+    nextBeat: '',
+    loreHits: [],
+    dialogueHint: '',
+    raw: unwrapped,
+  };
+}
+
 async function generateStoryResponse(input) {
   const prompt = buildStoryPrompt(input);
   renderPromptPreview();
@@ -694,12 +738,19 @@ async function generateStoryResponse(input) {
       prompt,
       maxNewTokens: 220,
     });
-    const generated = cleanGeneratedStory(prompt, extractGeneratedText(result.generatedText));
-    const storyText = generated || '……';
+    const generated = parseStoryGeneration(prompt, extractGeneratedText(result.generatedText));
+    const storyText = generated.narration || generated.raw || '……';
     const plot = state.plot || createPlot(state.theme);
     plot.currentBeat = '進行';
+    plot.nextBeat = generated.nextBeat || '未定';
     state.plot = plot;
     addLog(storyText, 'story');
+    if (generated.nextBeat) {
+      addLog(`次の展開: ${generated.nextBeat}`, 'story');
+    }
+    if (generated.dialogueHint) {
+      addLog(`次の指針: ${generated.dialogueHint}`, 'story');
+    }
     renderHeader();
     renderPromptPreview();
     setLlmStatus(`llm: ready ${storyReadyModel || 'browser'}`);
@@ -731,6 +782,7 @@ function nextScene() {
     state.scene = 1;
   }
   state.plot.currentBeat = '展開';
+  state.plot.nextBeat = '未定';
   addLog(`Scene advanced to Chapter ${state.chapter} Scene ${state.scene}.`, 'story');
   renderHeader();
   saveState();
@@ -757,6 +809,7 @@ function regeneratePlot() {
   state.theme = theme;
   state.plot = createPlot(theme);
   state.plot.currentBeat = '導入';
+  state.plot.nextBeat = '未定';
   renderPlot();
   renderHeader();
   saveState();
