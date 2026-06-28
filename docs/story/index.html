@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>lingo story</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./style.css" />
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div class="eyebrow">Story Mode</div>
+        <h1>LINE 風 物語進行エディタ</h1>
+        <p class="lede">
+          翻訳モードとは別の URL で、会話を使って物語を進めるための入口です。
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="../">翻訳モードへ戻る</a>
+          <button class="button button-secondary" id="next-scene-btn" type="button">次の展開</button>
+        </div>
+      </section>
+
+      <section class="story-shell">
+        <aside class="panel sidebar">
+          <p class="kicker">State</p>
+          <h2>物語状態</h2>
+
+          <div class="state-grid">
+            <div class="state-item">
+              <span>Chapter</span>
+              <strong id="chapter-label">Chapter 1</strong>
+            </div>
+            <div class="state-item">
+              <span>Scene</span>
+              <strong id="scene-label">Scene 1</strong>
+            </div>
+            <div class="state-item">
+              <span>Pov</span>
+              <strong id="pov-label">You</strong>
+            </div>
+          </div>
+
+          <label class="field">
+            <span>テーマ</span>
+            <input id="theme-input" type="text" placeholder="例: 失われた都市" />
+          </label>
+
+          <label class="field">
+            <span>会話入力</span>
+            <textarea id="line-input" rows="5" placeholder="登場人物のセリフや行動を入力"></textarea>
+          </label>
+
+          <div class="sidebar-actions">
+            <button class="button button-primary" id="add-line-btn" type="button">シーンに追加</button>
+            <button class="button button-secondary" id="reset-btn" type="button">リセット</button>
+          </div>
+        </aside>
+
+        <section class="panel story-main">
+          <div class="story-head">
+            <div>
+              <p class="kicker">Flow</p>
+              <h2>会話で進む物語ログ</h2>
+            </div>
+            <div class="badge" id="status-badge">idle</div>
+          </div>
+
+          <div class="story-log" id="story-log" aria-live="polite"></div>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
