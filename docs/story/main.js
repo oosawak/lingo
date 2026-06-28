@@ -8,10 +8,15 @@ const statusBadge = document.getElementById('status-badge');
 const nextSceneBtn = document.getElementById('next-scene-btn');
 const addLineBtn = document.getElementById('add-line-btn');
 const resetBtn = document.getElementById('reset-btn');
+const plotResetBtn = document.getElementById('plot-reset-btn');
+const plotTitle = document.getElementById('plot-title');
+const plotPremise = document.getElementById('plot-premise');
+const plotRules = document.getElementById('plot-rules');
 
 const STORAGE_KEY = 'lingo.story.state';
 
 function createDefaultState() {
+  const plot = createPlot('失われた街');
   return {
     chapter: 1,
     scene: 1,
@@ -19,6 +24,23 @@ function createDefaultState() {
     theme: '失われた街',
     lines: [],
     entries: [],
+    plot,
+  };
+}
+
+function createPlot(theme) {
+  const title = theme || '失われた街';
+  const premise = `${title} を舞台に、会話で状況が進む物語をローカルで進行する。`;
+  return {
+    title,
+    premise,
+    rules: [
+      '会話1回につき、物語は1段階だけ進む',
+      '章とシーンは保存され、再読込後も復元される',
+      '応答はプロットに沿って簡潔に返す',
+    ],
+    cast: ['You', 'Narrator'],
+    currentBeat: '導入',
   };
 }
 
@@ -44,6 +66,23 @@ function loadState() {
               text: entry.text,
             }))
         : [],
+      plot: parsed.plot && typeof parsed.plot === 'object'
+        ? {
+            title: typeof parsed.plot.title === 'string' && parsed.plot.title.trim() ? parsed.plot.title.trim() : (typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '失われた街'),
+            premise: typeof parsed.plot.premise === 'string' && parsed.plot.premise.trim()
+              ? parsed.plot.premise.trim()
+              : `${typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '物語'} を舞台に、会話で状況が進む。`,
+            rules: Array.isArray(parsed.plot.rules) && parsed.plot.rules.length > 0
+              ? parsed.plot.rules.filter((rule) => typeof rule === 'string')
+              : createPlot(parsed.theme || '失われた街').rules,
+            cast: Array.isArray(parsed.plot.cast) && parsed.plot.cast.length > 0
+              ? parsed.plot.cast.filter((name) => typeof name === 'string')
+              : createPlot(parsed.theme || '失われた街').cast,
+            currentBeat: typeof parsed.plot.currentBeat === 'string' && parsed.plot.currentBeat.trim()
+              ? parsed.plot.currentBeat.trim()
+              : '導入',
+          }
+        : createPlot(typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '失われた街'),
     };
   } catch {
     return createDefaultState();
@@ -62,7 +101,20 @@ function renderHeader() {
   chapterLabel.textContent = `Chapter ${state.chapter}`;
   sceneLabel.textContent = `Scene ${state.scene}`;
   povLabel.textContent = state.pov;
-  statusBadge.textContent = state.theme ? `theme: ${state.theme}` : 'idle';
+  statusBadge.textContent = state.plot?.currentBeat ? `beat: ${state.plot.currentBeat}` : 'idle';
+}
+
+function renderPlot() {
+  const plot = state.plot || createPlot(state.theme);
+  plotTitle.textContent = plot.title;
+  plotPremise.textContent = plot.premise;
+  plotRules.innerHTML = '';
+
+  for (const rule of plot.rules) {
+    const li = document.createElement('li');
+    li.textContent = rule;
+    plotRules.appendChild(li);
+  }
 }
 
 function renderLog() {
@@ -90,13 +142,17 @@ function addLog(text, kind) {
 }
 
 function appendStoryResponse(input) {
-  const theme = state.theme || '物語';
+  const plot = state.plot || createPlot(state.theme);
+  const beat = state.lines.length % 3 === 0 ? '転換' : state.lines.length % 2 === 0 ? '進行' : '観察';
+  plot.currentBeat = beat;
   const responses = [
-    `${theme} の場面が少し進む。`,
-    `${input || '沈黙'} をきっかけに、状況が変わる。`,
-    `Chapter ${state.chapter} Scene ${state.scene} の続きが描かれる。`,
+    `${plot.title} の ${beat} が進む。`,
+    `${input || '沈黙'} を受けて、${plot.cast[1] ?? 'Narrator'} が次の動きを示す。`,
+    `Chapter ${state.chapter} Scene ${state.scene} の流れが維持される。`,
   ];
   addLog(responses[state.lines.length % responses.length], 'story');
+  state.plot = plot;
+  renderHeader();
 }
 
 function addLine() {
@@ -118,6 +174,7 @@ function nextScene() {
     state.chapter += 1;
     state.scene = 1;
   }
+  state.plot.currentBeat = '展開';
   addLog(`Scene advanced to Chapter ${state.chapter} Scene ${state.scene}.`, 'story');
   renderHeader();
   saveState();
@@ -131,14 +188,31 @@ function resetStory() {
   state.theme = theme;
   state.lines = [];
   state.entries = [];
+  state.plot = createPlot(theme);
   renderLog();
   addLog('物語の開始地点に戻りました。', 'story');
+  renderPlot();
+  renderHeader();
+  saveState();
+}
+
+function regeneratePlot() {
+  const theme = themeInput.value.trim() || state.theme || '失われた街';
+  state.theme = theme;
+  state.plot = createPlot(theme);
+  state.plot.currentBeat = '導入';
+  renderPlot();
   renderHeader();
   saveState();
 }
 
 themeInput.addEventListener('input', () => {
   state.theme = themeInput.value.trim();
+  if (state.plot) {
+    state.plot.title = state.theme || '失われた街';
+    state.plot.premise = `${state.plot.title} を舞台に、会話で状況が進む物語をローカルで進行する。`;
+  }
+  renderPlot();
   renderHeader();
   saveState();
 });
@@ -146,6 +220,7 @@ themeInput.addEventListener('input', () => {
 addLineBtn.addEventListener('click', addLine);
 nextSceneBtn.addEventListener('click', nextScene);
 resetBtn.addEventListener('click', resetStory);
+plotResetBtn.addEventListener('click', regeneratePlot);
 
 lineInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
@@ -155,6 +230,7 @@ lineInput.addEventListener('keydown', (event) => {
 });
 
 themeInput.value = state.theme;
+renderPlot();
 renderHeader();
 if (state.entries.length === 0) {
   addLog('このページは翻訳モードとは別の URL です。', 'story');

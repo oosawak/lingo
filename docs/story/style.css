@@ -192,6 +192,50 @@ h1 {
   font-size: 1rem;
 }
 
+.plot-card {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.plot-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.plot-title {
+  margin-top: 12px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--accent-2);
+}
+
+.plot-premise {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.plot-list {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--text);
+}
+
+.plot-list li {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.plot-reset-btn {
+  min-height: 34px;
+  padding: 0 12px;
+}
+
 .field {
   display: grid;
   gap: 8px;
@@ -282,4 +326,3 @@ textarea:focus {
     margin-right: 0;
   }
 }
-
