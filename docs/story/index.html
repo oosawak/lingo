@@ -28,44 +28,132 @@
           <p class="kicker">State</p>
           <h2>物語状態</h2>
 
+          <div class="story-tabs" role="tablist" aria-label="story editor tabs">
+            <button class="story-tab active" type="button" data-story-tab="basic" aria-selected="true">基本設定</button>
+            <button class="story-tab" type="button" data-story-tab="character" aria-selected="false">キャラクター</button>
+            <button class="story-tab" type="button" data-story-tab="lore" aria-selected="false">裏設定</button>
+            <button class="story-tab" type="button" data-story-tab="style" aria-selected="false">スタイル</button>
+            <button class="story-tab" type="button" data-story-tab="intro" aria-selected="false">イントロ</button>
+            <button class="story-tab" type="button" data-story-tab="summary" aria-selected="false">紹介</button>
+            <button class="story-tab" type="button" data-story-tab="detail" aria-selected="false">詳細設定</button>
+          </div>
+
+          <div class="story-panels">
+            <section class="story-panel active" data-story-panel="basic">
+              <div class="state-grid">
+                <div class="state-item">
+                  <span>Chapter</span>
+                  <strong id="chapter-label">Chapter 1</strong>
+                </div>
+                <div class="state-item">
+                  <span>Scene</span>
+                  <strong id="scene-label">Scene 1</strong>
+                </div>
+                <div class="state-item">
+                  <span>Pov</span>
+                  <strong id="pov-label">You</strong>
+                </div>
+              </div>
+
+              <div class="plot-card">
+                <div class="plot-head">
+                  <p class="kicker">Plot</p>
+                  <button class="button button-secondary plot-reset-btn" id="plot-reset-btn" type="button">再生成</button>
+                </div>
+                <div class="plot-title" id="plot-title">失われた街</div>
+                <p class="plot-premise" id="plot-premise"></p>
+                <ul class="plot-list" id="plot-rules"></ul>
+              </div>
+
+              <label class="field">
+                <span>テーマ</span>
+                <input id="theme-input" type="text" placeholder="例: 失われた都市" />
+              </label>
+            </section>
+
+            <section class="story-panel" data-story-panel="character">
+              <div class="tab-note">
+                キャラクターの性格・口調・役割を登録します。
+              </div>
+              <div class="mini-grid">
+                <div class="mini-card">名前</div>
+                <div class="mini-card">性格</div>
+                <div class="mini-card">口調</div>
+                <div class="mini-card">関係性</div>
+              </div>
+            </section>
+
+            <section class="story-panel" data-story-panel="lore">
+              <div class="tab-note">
+                裏設定は、会話中のキーワードに反応して必要な背景だけを呼び出します。
+              </div>
+              <div class="mini-grid">
+                <div class="mini-card">キーワード</div>
+                <div class="mini-card">説明文</div>
+                <div class="mini-card">発動条件</div>
+                <div class="mini-card">共有可否</div>
+              </div>
+            </section>
+
+            <section class="story-panel" data-story-panel="style">
+              <div class="tab-note">
+                文体・テンポ・会話比率を調整します。
+              </div>
+              <div class="mini-grid">
+                <div class="mini-card">文体</div>
+                <div class="mini-card">視点</div>
+                <div class="mini-card">テンポ</div>
+                <div class="mini-card">応答長</div>
+              </div>
+            </section>
+
+            <section class="story-panel" data-story-panel="intro">
+              <div class="tab-note">
+                物語の開始文と最初の状況を決めます。
+              </div>
+              <div class="mini-grid">
+                <div class="mini-card">開始文</div>
+                <div class="mini-card">開始時の状況</div>
+                <div class="mini-card">最初の登場人物</div>
+                <div class="mini-card">導入の方向性</div>
+              </div>
+            </section>
+
+            <section class="story-panel" data-story-panel="summary">
+              <div class="tab-note">
+                公開用の短い紹介を作ります。
+              </div>
+              <div class="mini-grid">
+                <div class="mini-card">公開タイトル</div>
+                <div class="mini-card">短い紹介文</div>
+                <div class="mini-card">タグ</div>
+                <div class="mini-card">一言コピー</div>
+              </div>
+            </section>
+
+            <section class="story-panel" data-story-panel="detail">
+              <div class="tab-note">
+                禁止事項や保存設定など、細かい制御をまとめます。
+              </div>
+              <div class="mini-grid">
+                <div class="mini-card">禁止事項</div>
+                <div class="mini-card">自動補正</div>
+                <div class="mini-card">発動条件</div>
+                <div class="mini-card">保存設定</div>
+              </div>
+            </section>
+          </div>
+
           <div class="state-grid">
-            <div class="state-item">
-              <span>Chapter</span>
-              <strong id="chapter-label">Chapter 1</strong>
-            </div>
-            <div class="state-item">
-              <span>Scene</span>
-              <strong id="scene-label">Scene 1</strong>
-            </div>
-            <div class="state-item">
-              <span>Pov</span>
-              <strong id="pov-label">You</strong>
-            </div>
-          </div>
+            <label class="field">
+              <span>会話入力</span>
+              <textarea id="line-input" rows="5" placeholder="登場人物のセリフや行動を入力"></textarea>
+            </label>
 
-          <div class="plot-card">
-            <div class="plot-head">
-              <p class="kicker">Plot</p>
-              <button class="button button-secondary plot-reset-btn" id="plot-reset-btn" type="button">再生成</button>
+            <div class="sidebar-actions">
+              <button class="button button-primary" id="add-line-btn" type="button">シーンに追加</button>
+              <button class="button button-secondary" id="reset-btn" type="button">リセット</button>
             </div>
-            <div class="plot-title" id="plot-title">失われた街</div>
-            <p class="plot-premise" id="plot-premise"></p>
-            <ul class="plot-list" id="plot-rules"></ul>
-          </div>
-
-          <label class="field">
-            <span>テーマ</span>
-            <input id="theme-input" type="text" placeholder="例: 失われた都市" />
-          </label>
-
-          <label class="field">
-            <span>会話入力</span>
-            <textarea id="line-input" rows="5" placeholder="登場人物のセリフや行動を入力"></textarea>
-          </label>
-
-          <div class="sidebar-actions">
-            <button class="button button-primary" id="add-line-btn" type="button">シーンに追加</button>
-            <button class="button button-secondary" id="reset-btn" type="button">リセット</button>
           </div>
         </aside>
 

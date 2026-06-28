@@ -12,6 +12,9 @@ const plotResetBtn = document.getElementById('plot-reset-btn');
 const plotTitle = document.getElementById('plot-title');
 const plotPremise = document.getElementById('plot-premise');
 const plotRules = document.getElementById('plot-rules');
+const tabButtons = [...document.querySelectorAll('[data-story-tab]')];
+const tabPanels = [...document.querySelectorAll('[data-story-panel]')];
+const STORY_TABS = new Set(tabButtons.map((button) => button.dataset.storyTab).filter(Boolean));
 
 const STORAGE_KEY = 'lingo.story.state';
 
@@ -24,6 +27,7 @@ function createDefaultState() {
     theme: '失われた街',
     lines: [],
     entries: [],
+    activeTab: 'basic',
     plot,
   };
 }
@@ -66,6 +70,9 @@ function loadState() {
               text: entry.text,
             }))
         : [],
+      activeTab: typeof parsed.activeTab === 'string' && parsed.activeTab.trim()
+        ? parsed.activeTab.trim()
+        : 'basic',
       plot: parsed.plot && typeof parsed.plot === 'object'
         ? {
             title: typeof parsed.plot.title === 'string' && parsed.plot.title.trim() ? parsed.plot.title.trim() : (typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '失われた街'),
@@ -95,6 +102,23 @@ const state = {
 
 function saveState() {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function setActiveTab(tabName) {
+  const nextTab = STORY_TABS.has(tabName) ? tabName : 'basic';
+  state.activeTab = nextTab;
+
+  for (const button of tabButtons) {
+    const isActive = button.dataset.storyTab === nextTab;
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-selected', String(isActive));
+  }
+
+  for (const panel of tabPanels) {
+    panel.classList.toggle('active', panel.dataset.storyPanel === nextTab);
+  }
+
+  saveState();
 }
 
 function renderHeader() {
@@ -222,6 +246,12 @@ nextSceneBtn.addEventListener('click', nextScene);
 resetBtn.addEventListener('click', resetStory);
 plotResetBtn.addEventListener('click', regeneratePlot);
 
+for (const button of tabButtons) {
+  button.addEventListener('click', () => {
+    setActiveTab(button.dataset.storyTab || 'basic');
+  });
+}
+
 lineInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
     event.preventDefault();
@@ -232,6 +262,7 @@ lineInput.addEventListener('keydown', (event) => {
 themeInput.value = state.theme;
 renderPlot();
 renderHeader();
+setActiveTab(state.activeTab);
 if (state.entries.length === 0) {
   addLog('このページは翻訳モードとは別の URL です。', 'story');
   addLog('会話を積み重ねて物語を進めます。', 'story');
