@@ -65,6 +65,14 @@
                 <ul class="plot-list" id="plot-rules"></ul>
               </div>
 
+              <div class="prompt-card">
+                <div class="plot-head">
+                  <p class="kicker">Prompt</p>
+                  <span class="prompt-hint">LLM に渡す現在の内容</span>
+                </div>
+                <textarea id="prompt-preview" class="prompt-preview" rows="12" readonly></textarea>
+              </div>
+
               <label class="field">
                 <span>テーマ</span>
                 <input id="theme-input" type="text" placeholder="例: 失われた都市" />
@@ -75,11 +83,52 @@
               <div class="tab-note">
                 キャラクターの性格・口調・役割を登録します。
               </div>
-              <div class="mini-grid">
-                <div class="mini-card">名前</div>
-                <div class="mini-card">性格</div>
-                <div class="mini-card">口調</div>
-                <div class="mini-card">関係性</div>
+              <div class="entity-stack">
+                <article class="entity-card">
+                  <div class="entity-head">
+                    <strong>キャラクター 1</strong>
+                    <span class="entity-tag">主人公</span>
+                  </div>
+                  <label class="field">
+                    <span>名前</span>
+                    <input id="character-0-name" type="text" placeholder="例: ユウ" />
+                  </label>
+                  <label class="field">
+                    <span>性格</span>
+                    <textarea id="character-0-personality" rows="3" placeholder="落ち着いていて観察力がある"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>口調</span>
+                    <textarea id="character-0-voice" rows="2" placeholder="短く話す。語尾はやや柔らかい"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>関係性</span>
+                    <input id="character-0-relation" type="text" placeholder="相手との関係を入力" />
+                  </label>
+                </article>
+
+                <article class="entity-card">
+                  <div class="entity-head">
+                    <strong>キャラクター 2</strong>
+                    <span class="entity-tag">相手役</span>
+                  </div>
+                  <label class="field">
+                    <span>名前</span>
+                    <input id="character-1-name" type="text" placeholder="例: アリス" />
+                  </label>
+                  <label class="field">
+                    <span>性格</span>
+                    <textarea id="character-1-personality" rows="3" placeholder="明るいが秘密を抱えている"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>口調</span>
+                    <textarea id="character-1-voice" rows="2" placeholder="少し砕けた話し方"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>関係性</span>
+                    <input id="character-1-relation" type="text" placeholder="主人公との関係を入力" />
+                  </label>
+                </article>
               </div>
             </section>
 
@@ -87,11 +136,52 @@
               <div class="tab-note">
                 裏設定は、会話中のキーワードに反応して必要な背景だけを呼び出します。
               </div>
-              <div class="mini-grid">
-                <div class="mini-card">キーワード</div>
-                <div class="mini-card">説明文</div>
-                <div class="mini-card">発動条件</div>
-                <div class="mini-card">共有可否</div>
+              <div class="entity-stack">
+                <article class="entity-card">
+                  <div class="entity-head">
+                    <strong>裏設定 1</strong>
+                    <span class="entity-tag">重要語</span>
+                  </div>
+                  <label class="field">
+                    <span>キーワード</span>
+                    <input id="lore-0-keyword" type="text" placeholder="例: マギア王国" />
+                  </label>
+                  <label class="field">
+                    <span>説明文</span>
+                    <textarea id="lore-0-description" rows="3" placeholder="必要時だけ読ませたい背景設定"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>発動条件</span>
+                    <input id="lore-0-trigger" type="text" placeholder="会話に含まれたら発動" />
+                  </label>
+                  <label class="toggle-row">
+                    <input id="lore-0-shared" type="checkbox" />
+                    <span>共有する</span>
+                  </label>
+                </article>
+
+                <article class="entity-card">
+                  <div class="entity-head">
+                    <strong>裏設定 2</strong>
+                    <span class="entity-tag">補助語</span>
+                  </div>
+                  <label class="field">
+                    <span>キーワード</span>
+                    <input id="lore-1-keyword" type="text" placeholder="例: 暗黒魔法の書" />
+                  </label>
+                  <label class="field">
+                    <span>説明文</span>
+                    <textarea id="lore-1-description" rows="3" placeholder="関連する背景や歴史を書きます"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>発動条件</span>
+                    <input id="lore-1-trigger" type="text" placeholder="特定の単語が出たら呼び出す" />
+                  </label>
+                  <label class="toggle-row">
+                    <input id="lore-1-shared" type="checkbox" />
+                    <span>共有する</span>
+                  </label>
+                </article>
               </div>
             </section>
 
@@ -99,11 +189,36 @@
               <div class="tab-note">
                 文体・テンポ・会話比率を調整します。
               </div>
-              <div class="mini-grid">
-                <div class="mini-card">文体</div>
-                <div class="mini-card">視点</div>
-                <div class="mini-card">テンポ</div>
-                <div class="mini-card">応答長</div>
+              <div class="entity-stack">
+                <label class="field">
+                  <span>文体</span>
+                  <input id="style-tone" type="text" placeholder="例: 落ち着いた / 軽快 / 重厚" />
+                </label>
+                <label class="field">
+                  <span>視点</span>
+                  <select id="style-viewpoint">
+                    <option value="一人称">一人称</option>
+                    <option value="二人称">二人称</option>
+                    <option value="三人称">三人称</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>テンポ</span>
+                  <select id="style-tempo">
+                    <option value="遅い">遅い</option>
+                    <option value="自然">自然</option>
+                    <option value="速い">速い</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>応答長</span>
+                  <select id="style-length">
+                    <option value="短い">短い</option>
+                    <option value="中間">中間</option>
+                    <option value="長い">長い</option>
+                    <option value="自動">自動</option>
+                  </select>
+                </label>
               </div>
             </section>
 
@@ -111,11 +226,27 @@
               <div class="tab-note">
                 物語の開始文と最初の状況を決めます。
               </div>
-              <div class="mini-grid">
-                <div class="mini-card">開始文</div>
-                <div class="mini-card">開始時の状況</div>
-                <div class="mini-card">最初の登場人物</div>
-                <div class="mini-card">導入の方向性</div>
+              <div class="entity-stack">
+                <label class="field">
+                  <span>開始文</span>
+                  <textarea id="intro-opening" rows="3" placeholder="物語の冒頭に置く文を入力"></textarea>
+                </label>
+                <label class="field">
+                  <span>開始時の状況</span>
+                  <textarea id="intro-situation" rows="3" placeholder="登場人物の置かれた状況を入力"></textarea>
+                </label>
+                <label class="field">
+                  <span>最初の登場人物</span>
+                  <input id="intro-first-character" type="text" placeholder="例: ユウ" />
+                </label>
+                <label class="field">
+                  <span>導入の方向性</span>
+                  <select id="intro-direction">
+                    <option value="会話から始める">会話から始める</option>
+                    <option value="状況説明から始める">状況説明から始める</option>
+                    <option value="事件から始める">事件から始める</option>
+                  </select>
+                </label>
               </div>
             </section>
 
@@ -123,11 +254,23 @@
               <div class="tab-note">
                 公開用の短い紹介を作ります。
               </div>
-              <div class="mini-grid">
-                <div class="mini-card">公開タイトル</div>
-                <div class="mini-card">短い紹介文</div>
-                <div class="mini-card">タグ</div>
-                <div class="mini-card">一言コピー</div>
+              <div class="entity-stack">
+                <label class="field">
+                  <span>公開タイトル</span>
+                  <input id="summary-title" type="text" placeholder="公開時のタイトル" />
+                </label>
+                <label class="field">
+                  <span>短い紹介文</span>
+                  <textarea id="summary-description" rows="3" placeholder="作品の概要を短くまとめます"></textarea>
+                </label>
+                <label class="field">
+                  <span>タグ</span>
+                  <input id="summary-tags" type="text" placeholder="例: #恋愛 #学園 #ミステリ" />
+                </label>
+                <label class="field">
+                  <span>一言コピー</span>
+                  <input id="summary-copy" type="text" placeholder="見た人が気になる一文" />
+                </label>
               </div>
             </section>
 
@@ -135,11 +278,23 @@
               <div class="tab-note">
                 禁止事項や保存設定など、細かい制御をまとめます。
               </div>
-              <div class="mini-grid">
-                <div class="mini-card">禁止事項</div>
-                <div class="mini-card">自動補正</div>
-                <div class="mini-card">発動条件</div>
-                <div class="mini-card">保存設定</div>
+              <div class="entity-stack">
+                <label class="field">
+                  <span>禁止事項</span>
+                  <textarea id="detail-forbidden" rows="3" placeholder="生成してほしくない要素を入力"></textarea>
+                </label>
+                <label class="toggle-row">
+                  <input id="detail-autocorrect" type="checkbox" checked />
+                  <span>自動補正を有効にする</span>
+                </label>
+                <label class="field">
+                  <span>発動条件</span>
+                  <input id="detail-trigger" type="text" placeholder="特定の単語や状況で切り替え" />
+                </label>
+                <label class="toggle-row">
+                  <input id="detail-save" type="checkbox" checked />
+                  <span>編集内容を保存する</span>
+                </label>
               </div>
             </section>
           </div>
@@ -163,7 +318,10 @@
               <p class="kicker">Flow</p>
               <h2>会話で進む物語ログ</h2>
             </div>
-            <div class="badge" id="status-badge">idle</div>
+            <div class="story-status">
+              <div class="badge" id="status-badge">beat: idle</div>
+              <div class="badge badge-secondary" id="llm-status-badge">llm: idle</div>
+            </div>
           </div>
 
           <div class="story-log" id="story-log" aria-live="polite"></div>
