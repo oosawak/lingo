@@ -19,7 +19,6 @@
         <div class="hero-actions">
           <a class="button button-primary" href="../">翻訳モードへ戻る</a>
           <a class="button button-secondary" href="../#lobby">翻訳の入室へ</a>
-          <button class="button button-secondary" id="next-scene-btn" type="button">次の展開</button>
         </div>
       </section>
 
@@ -299,17 +298,6 @@
             </section>
           </div>
 
-          <div class="state-grid">
-            <label class="field">
-              <span>会話入力</span>
-              <textarea id="line-input" rows="5" placeholder="登場人物のセリフや行動を入力"></textarea>
-            </label>
-
-            <div class="sidebar-actions">
-              <button class="button button-primary" id="add-line-btn" type="button">シーンに追加</button>
-              <button class="button button-secondary" id="reset-btn" type="button">リセット</button>
-            </div>
-          </div>
         </aside>
 
         <section class="panel story-main">
@@ -322,6 +310,44 @@
               <div class="badge" id="status-badge">beat: idle</div>
               <div class="badge badge-secondary" id="next-beat-badge">next: -</div>
               <div class="badge badge-secondary" id="llm-status-badge">llm: idle</div>
+            </div>
+          </div>
+
+          <article class="story-result-card" id="story-result-card">
+            <div class="story-result-head">
+              <p class="kicker">Result</p>
+              <span class="story-result-title" id="story-result-title">まだ生成されていません</span>
+            </div>
+            <div class="story-result-grid">
+              <div class="story-result-block">
+                <span>本文</span>
+                <p id="story-result-narration">会話を送るとここに物語本文が出ます。</p>
+              </div>
+              <div class="story-result-block">
+                <span>次の展開</span>
+                <p id="story-result-next-beat">-</p>
+              </div>
+              <div class="story-result-block">
+                <span>裏設定</span>
+                <p id="story-result-lore-hits">-</p>
+              </div>
+              <div class="story-result-block">
+                <span>次の指針</span>
+                <p id="story-result-dialogue-hint">-</p>
+              </div>
+            </div>
+          </article>
+
+          <div class="story-composer">
+            <label class="field story-message-field" for="line-input">
+              <span>Message</span>
+              <textarea id="line-input" rows="3" placeholder="物語を進めるセリフや描写を入力"></textarea>
+            </label>
+
+            <div class="story-composer-actions">
+              <button class="button button-primary" id="add-line-btn" type="button">送信</button>
+              <button class="button button-secondary" id="next-scene-btn" type="button">次の展開</button>
+              <button class="button button-secondary" id="reset-btn" type="button">リセット</button>
             </div>
           </div>
 

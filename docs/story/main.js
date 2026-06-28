@@ -7,6 +7,11 @@ const povLabel = document.getElementById('pov-label');
 const statusBadge = document.getElementById('status-badge');
 const nextBeatBadge = document.getElementById('next-beat-badge');
 const llmStatusBadge = document.getElementById('llm-status-badge');
+const storyResultTitle = document.getElementById('story-result-title');
+const storyResultNarration = document.getElementById('story-result-narration');
+const storyResultNextBeat = document.getElementById('story-result-next-beat');
+const storyResultLoreHits = document.getElementById('story-result-lore-hits');
+const storyResultDialogueHint = document.getElementById('story-result-dialogue-hint');
 const nextSceneBtn = document.getElementById('next-scene-btn');
 const addLineBtn = document.getElementById('add-line-btn');
 const resetBtn = document.getElementById('reset-btn');
@@ -582,6 +587,9 @@ function getSpeakerName(kind) {
   const settings = state.storySettings || createDefaultStorySettings();
   const protagonist = settings.characters[0]?.name?.trim() || 'You';
   const counterpart = settings.characters[1]?.name?.trim() || 'Story';
+  if (kind === 'system') {
+    return 'System';
+  }
   return kind === 'user' ? protagonist : counterpart;
 }
 
@@ -631,18 +639,43 @@ function renderLog() {
   storyLog.innerHTML = '';
 
   for (const entry of state.entries) {
-    const item = document.createElement('article');
-    item.className = `log-item ${entry.kind}`;
+    const row = document.createElement('div');
+    const side = entry.kind === 'user' ? 'right' : 'left';
+    row.className = `bubble-row ${side}`;
+
+    const bubble = document.createElement('article');
+    bubble.className = `bubble ${side}`;
+
     const meta = document.createElement('span');
-    meta.className = 'meta';
+    meta.className = 'bubble-meta';
     meta.textContent = getSpeakerName(entry.kind);
+
     const body = document.createElement('div');
     body.textContent = entry.text;
-    item.append(meta, body);
-    storyLog.appendChild(item);
+    bubble.append(meta, body);
+    row.appendChild(bubble);
+    storyLog.appendChild(row);
   }
 
   storyLog.scrollTop = storyLog.scrollHeight;
+}
+
+function renderStoryResult(result) {
+  if (storyResultTitle) {
+    storyResultTitle.textContent = state.theme || '物語';
+  }
+  if (storyResultNarration) {
+    storyResultNarration.textContent = result?.narration || result?.raw || '会話を送るとここに物語本文が出ます。';
+  }
+  if (storyResultNextBeat) {
+    storyResultNextBeat.textContent = result?.nextBeat || '未定';
+  }
+  if (storyResultLoreHits) {
+    storyResultLoreHits.textContent = result?.loreHits?.length ? result.loreHits.join(' / ') : '-';
+  }
+  if (storyResultDialogueHint) {
+    storyResultDialogueHint.textContent = result?.dialogueHint || '-';
+  }
 }
 
 function addLog(text, kind) {
@@ -745,12 +778,7 @@ async function generateStoryResponse(input) {
     plot.nextBeat = generated.nextBeat || '未定';
     state.plot = plot;
     addLog(storyText, 'story');
-    if (generated.nextBeat) {
-      addLog(`次の展開: ${generated.nextBeat}`, 'story');
-    }
-    if (generated.dialogueHint) {
-      addLog(`次の指針: ${generated.dialogueHint}`, 'story');
-    }
+    renderStoryResult(generated);
     renderHeader();
     renderPromptPreview();
     setLlmStatus(`llm: ready ${storyReadyModel || 'browser'}`);
@@ -758,7 +786,14 @@ async function generateStoryResponse(input) {
     const message = error instanceof Error && error.message ? error.message : '物語の生成に失敗しました。';
     console.error('[lingo] Story generation failed:', error);
     setLlmStatus('llm: error');
-    addLog(`物語の生成に失敗しました。${message}`, 'story');
+    addLog(`物語の生成に失敗しました。${message}`, 'system');
+    renderStoryResult({
+      narration: '生成に失敗しました。',
+      nextBeat: '',
+      loreHits: [],
+      dialogueHint: message,
+      raw: '',
+    });
   }
 }
 
@@ -886,11 +921,12 @@ renderHeader();
 renderFormState();
 setActiveTab(state.activeTab);
 if (state.entries.length === 0) {
-  addLog('このページは翻訳モードとは別の URL です。', 'story');
-  addLog('会話を積み重ねて物語を進めます。', 'story');
+  addLog('このページは翻訳モードとは別の URL です。', 'system');
+  addLog('会話を積み重ねて物語を進めます。', 'system');
 } else {
   renderLog();
 }
+renderStoryResult();
 renderPromptPreview();
 void ensureStoryModelReady();
 saveState();
