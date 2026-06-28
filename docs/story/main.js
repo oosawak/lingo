@@ -9,13 +9,54 @@ const nextSceneBtn = document.getElementById('next-scene-btn');
 const addLineBtn = document.getElementById('add-line-btn');
 const resetBtn = document.getElementById('reset-btn');
 
+const STORAGE_KEY = 'lingo.story.state';
+
+function createDefaultState() {
+  return {
+    chapter: 1,
+    scene: 1,
+    pov: 'You',
+    theme: '失われた街',
+    lines: [],
+    entries: [],
+  };
+}
+
+function loadState() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return createDefaultState();
+    }
+
+    const parsed = JSON.parse(raw);
+    return {
+      chapter: Number.isInteger(parsed.chapter) && parsed.chapter > 0 ? parsed.chapter : 1,
+      scene: Number.isInteger(parsed.scene) && parsed.scene > 0 ? parsed.scene : 1,
+      pov: typeof parsed.pov === 'string' && parsed.pov.trim() ? parsed.pov : 'You',
+      theme: typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '失われた街',
+      lines: Array.isArray(parsed.lines) ? parsed.lines.filter((line) => typeof line === 'string') : [],
+      entries: Array.isArray(parsed.entries)
+        ? parsed.entries
+            .filter((entry) => entry && typeof entry.text === 'string')
+            .map((entry) => ({
+              kind: entry.kind === 'story' ? 'story' : 'user',
+              text: entry.text,
+            }))
+        : [],
+    };
+  } catch {
+    return createDefaultState();
+  }
+}
+
 const state = {
-  chapter: 1,
-  scene: 1,
-  pov: 'You',
-  theme: '',
-  lines: [],
+  ...loadState(),
 };
+
+function saveState() {
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
 
 function renderHeader() {
   chapterLabel.textContent = `Chapter ${state.chapter}`;
@@ -24,17 +65,28 @@ function renderHeader() {
   statusBadge.textContent = state.theme ? `theme: ${state.theme}` : 'idle';
 }
 
-function addLog(text, kind) {
-  const item = document.createElement('article');
-  item.className = `log-item ${kind}`;
-  const meta = document.createElement('span');
-  meta.className = 'meta';
-  meta.textContent = kind === 'user' ? 'User' : 'Story';
-  const body = document.createElement('div');
-  body.textContent = text;
-  item.append(meta, body);
-  storyLog.appendChild(item);
+function renderLog() {
+  storyLog.innerHTML = '';
+
+  for (const entry of state.entries) {
+    const item = document.createElement('article');
+    item.className = `log-item ${entry.kind}`;
+    const meta = document.createElement('span');
+    meta.className = 'meta';
+    meta.textContent = entry.kind === 'user' ? 'User' : 'Story';
+    const body = document.createElement('div');
+    body.textContent = entry.text;
+    item.append(meta, body);
+    storyLog.appendChild(item);
+  }
+
   storyLog.scrollTop = storyLog.scrollHeight;
+}
+
+function addLog(text, kind) {
+  state.entries.push({ text, kind });
+  renderLog();
+  saveState();
 }
 
 function appendStoryResponse(input) {
@@ -57,6 +109,7 @@ function addLine() {
   addLog(text, 'user');
   appendStoryResponse(text);
   lineInput.value = '';
+  saveState();
 }
 
 function nextScene() {
@@ -67,22 +120,27 @@ function nextScene() {
   }
   addLog(`Scene advanced to Chapter ${state.chapter} Scene ${state.scene}.`, 'story');
   renderHeader();
+  saveState();
 }
 
 function resetStory() {
+  const theme = themeInput.value.trim() || '失われた街';
   state.chapter = 1;
   state.scene = 1;
   state.pov = 'You';
-  state.theme = themeInput.value.trim();
+  state.theme = theme;
   state.lines = [];
-  storyLog.innerHTML = '';
+  state.entries = [];
+  renderLog();
   addLog('物語の開始地点に戻りました。', 'story');
   renderHeader();
+  saveState();
 }
 
 themeInput.addEventListener('input', () => {
   state.theme = themeInput.value.trim();
   renderHeader();
+  saveState();
 });
 
 addLineBtn.addEventListener('click', addLine);
@@ -96,8 +154,12 @@ lineInput.addEventListener('keydown', (event) => {
   }
 });
 
-themeInput.value = '失われた街';
-state.theme = themeInput.value;
+themeInput.value = state.theme;
 renderHeader();
-addLog('このページは翻訳モードとは別の URL です。', 'story');
-addLog('会話を積み重ねて物語を進めます。', 'story');
+if (state.entries.length === 0) {
+  addLog('このページは翻訳モードとは別の URL です。', 'story');
+  addLog('会話を積み重ねて物語を進めます。', 'story');
+} else {
+  renderLog();
+}
+saveState();
