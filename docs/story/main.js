@@ -89,6 +89,7 @@ const STORY_TABS = new Set(tabButtons.map((button) => button.dataset.storyTab).f
 
 const STORAGE_KEY = 'lingo.story.state';
 const STORY_MODEL_CANDIDATES = [
+  { modelId: 'Xenova/TinyLlama-1.1B-Chat-v1.0', task: 'text-generation' },
   { modelId: 'Xenova/Qwen2.5-0.5B-Instruct', task: 'text-generation' },
   { modelId: 'Xenova/mt5-small', task: 'text2text-generation' },
   { modelId: 'Xenova/flan-t5-small', task: 'text2text-generation' },
