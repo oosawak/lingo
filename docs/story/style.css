@@ -369,6 +369,10 @@ h1 {
   font-weight: 700;
 }
 
+.talk-engine-switch > span {
+  color: var(--accent);
+}
+
 .talk-engine-button {
   min-height: 34px;
   padding: 0 10px;
