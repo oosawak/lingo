@@ -154,6 +154,7 @@ function formatCharacterList(settings) {
 function getTalkStorySettings() {
   const state = loadStoryState();
   const settings = state?.storySettings && typeof state.storySettings === 'object' ? state.storySettings : {};
+  const storyPrompt = typeof state?.storyPrompt === 'string' ? state.storyPrompt.trim() : '';
   const title = (settings.summary?.title || state?.plot?.title || state?.theme || '失われた街').trim();
   const description = (settings.summary?.description || state?.plot?.premise || state?.description || '').trim();
   const opening = (settings.intro?.opening || settings.intro?.situation || '').trim() || `${title} を舞台に、会話で状況が進む。`;
@@ -167,6 +168,7 @@ function getTalkStorySettings() {
   return {
     state,
     settings,
+    storyPrompt,
     title,
     description,
     opening,
@@ -178,17 +180,43 @@ function getTalkStorySettings() {
 function buildTalkPrompt(userInput) {
   const story = getTalkStorySettings();
   const settings = story.settings;
+  const plot = story.state?.plot && typeof story.state.plot === 'object'
+    ? story.state.plot
+    : {
+        title: story.title,
+        premise: story.description || '',
+        currentBeat: '導入',
+        nextBeat: '未定',
+      };
+  const chapter = Number.isInteger(story.state?.chapter) ? story.state.chapter : 1;
+  const scene = Number.isInteger(story.state?.scene) ? story.state.scene : 1;
+  const theme = typeof story.state?.theme === 'string' ? story.state.theme.trim() : story.title;
+  const description = typeof story.state?.description === 'string' ? story.state.description.trim() : story.description;
   const styleTone = typeof settings.style?.tone === 'string' ? settings.style.tone.trim() : '';
   const viewpoint = typeof settings.style?.viewpoint === 'string' ? settings.style.viewpoint.trim() : '';
   const tempo = typeof settings.style?.tempo === 'string' ? settings.style.tempo.trim() : '';
   const length = typeof settings.style?.length === 'string' ? settings.style.length.trim() : '';
   const introDirection = typeof settings.intro?.direction === 'string' ? settings.intro.direction.trim() : '';
+  const introOpening = typeof settings.intro?.opening === 'string' ? settings.intro.opening.trim() : '';
+  const introSituation = typeof settings.intro?.situation === 'string' ? settings.intro.situation.trim() : '';
+  const introFirstCharacter = typeof settings.intro?.firstCharacter === 'string' ? settings.intro.firstCharacter.trim() : '';
   const endingSummary = typeof settings.ending?.summary === 'string' ? settings.ending.summary.trim() : '';
+  const endingState = typeof settings.ending?.state === 'string' ? settings.ending.state.trim() : '';
+  const endingLine = typeof settings.ending?.line === 'string' ? settings.ending.line.trim() : '';
+  const summaryTitle = typeof settings.summary?.title === 'string' ? settings.summary.title.trim() : '';
+  const summaryDescription = typeof settings.summary?.description === 'string' ? settings.summary.description.trim() : '';
+  const summaryTags = typeof settings.summary?.tags === 'string' ? settings.summary.tags.trim() : '';
   const summaryCopy = typeof settings.summary?.copy === 'string' ? settings.summary.copy.trim() : '';
   const flowTitle = typeof settings.flow?.title === 'string' ? settings.flow.title.trim() : '';
   const flowDescription = typeof settings.flow?.description === 'string' ? settings.flow.description.trim() : '';
+  const flowCharacters = settings.flow?.showCharacters ? '有効' : '無効';
+  const flowImages = settings.flow?.showImages ? '有効' : '無効';
   const detailForbidden = typeof settings.detail?.forbidden === 'string' ? settings.detail.forbidden.trim() : '';
+  const detailAutocorrect = settings.detail?.autocorrect ? '有効' : '無効';
   const detailTrigger = typeof settings.detail?.trigger === 'string' ? settings.detail.trigger.trim() : '';
+  const detailSave = settings.detail?.save ? '保存する' : '保存しない';
+  const loreFreeTitle = typeof settings.loreFree?.title === 'string' ? settings.loreFree.title.trim() : '';
+  const loreFreeText = typeof settings.loreFree?.text === 'string' ? settings.loreFree.text.trim() : '';
   const loreEntries = Array.isArray(settings.loreEntries) ? settings.loreEntries : [];
   const loreText = loreEntries
     .map((item, index) => {
@@ -211,11 +239,25 @@ function buildTalkPrompt(userInput) {
     `- テンポ: ${tempo || '自然'}`,
     `- 応答長: ${length || '自動'}`,
     '',
+    '【STORYで作成したプロンプト】',
+    story.storyPrompt || 'なし',
+    '',
+    '【STORY状態】',
+    `テーマ: ${theme || 'なし'}`,
+    `説明: ${description || 'なし'}`,
+    `章: ${chapter}`,
+    `シーン: ${scene}`,
+    `現在のビート: ${plot.currentBeat || '導入'}`,
+    `次のビート: ${plot.nextBeat || '未定'}`,
+    '',
     '【物語】',
     `タイトル: ${story.title}`,
     `説明: ${story.description || 'なし'}`,
     `出だし: ${story.opening}`,
     `始め方: ${introDirection || '会話から始める'}`,
+    `冒頭文: ${introOpening || 'なし'}`,
+    `開始時の状況: ${introSituation || 'なし'}`,
+    `最初に出すキャラ: ${introFirstCharacter || 'なし'}`,
     '',
     '【キャラクター】',
     formatCharacterList(settings) || 'なし',
@@ -223,19 +265,32 @@ function buildTalkPrompt(userInput) {
     '【裏設定】',
     loreText || 'なし',
     '',
+    '【自由記述の裏設定】',
+    `タイトル: ${loreFreeTitle || 'なし'}`,
+    `本文: ${loreFreeText || 'なし'}`,
+    '',
     '【エンディング】',
     `方向性: ${endingSummary || 'なし'}`,
+    `最終状態: ${endingState || 'なし'}`,
+    `締めのひと言: ${endingLine || 'なし'}`,
     '',
     '【紹介】',
+    `公開タイトル: ${summaryTitle || 'なし'}`,
+    `短い紹介文: ${summaryDescription || 'なし'}`,
+    `タグ: ${summaryTags || 'なし'}`,
     `一言コピー: ${summaryCopy || 'なし'}`,
     '',
     '【FLOW】',
     `表示タイトル: ${flowTitle || '登場人物'}`,
     `説明: ${flowDescription || 'なし'}`,
+    `人物表示: ${flowCharacters}`,
+    `画像表示: ${flowImages}`,
     '',
     '【制御】',
     `禁止事項: ${detailForbidden || 'なし'}`,
     `発動条件: ${detailTrigger || 'なし'}`,
+    `自動補正: ${detailAutocorrect}`,
+    `保存設定: ${detailSave}`,
     '',
     '【最近の会話】',
     formatTalkHistory(),

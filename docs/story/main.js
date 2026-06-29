@@ -289,6 +289,7 @@ function createDefaultState() {
     activeTab: 'basic',
     plot: createPlot(title, description),
     storySettings: createDefaultStorySettings(),
+    storyPrompt: '',
   };
 }
 
@@ -340,6 +341,7 @@ function loadState() {
         ? parsed.activeTab.trim()
         : 'basic',
       storySettings: normalizeStorySettings(parsed.storySettings ?? parsed.settings ?? parsed),
+      storyPrompt: typeof parsed.storyPrompt === 'string' ? parsed.storyPrompt : '',
       plot: parsed.plot && typeof parsed.plot === 'object'
         ? {
             title: typeof parsed.plot.title === 'string' && parsed.plot.title.trim()
@@ -489,7 +491,10 @@ function renderPromptPreview() {
     return;
   }
 
-  promptPreview.value = buildStoryPrompt(state.lines[state.lines.length - 1] ?? '');
+  const prompt = buildStoryPrompt(state.lines[state.lines.length - 1] ?? '');
+  promptPreview.value = prompt;
+  state.storyPrompt = prompt;
+  saveState();
 }
 
 function formatSettingList(items) {
