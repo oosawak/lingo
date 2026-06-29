@@ -1,9 +1,7 @@
 const storyLog = document.getElementById('story-log');
-const themeInput = document.getElementById('theme-input');
-const lineInput = document.getElementById('line-input');
 const chapterLabel = document.getElementById('chapter-label');
 const sceneLabel = document.getElementById('scene-label');
-const povLabel = document.getElementById('pov-label');
+const lineInput = document.getElementById('line-input');
 const statusBadge = document.getElementById('status-badge');
 const nextBeatBadge = document.getElementById('next-beat-badge');
 const llmStatusBadge = document.getElementById('llm-status-badge');
@@ -36,22 +34,32 @@ const characterRelationInputs = [
   document.getElementById('character-0-relation'),
   document.getElementById('character-1-relation'),
 ];
+const characterImageInputs = [
+  document.getElementById('character-0-image'),
+  document.getElementById('character-1-image'),
+];
 const loreKeywordInputs = [
   document.getElementById('lore-0-keyword'),
   document.getElementById('lore-1-keyword'),
+  document.getElementById('lore-2-keyword'),
 ];
 const loreDescriptionInputs = [
   document.getElementById('lore-0-description'),
   document.getElementById('lore-1-description'),
+  document.getElementById('lore-2-description'),
 ];
 const loreTriggerInputs = [
   document.getElementById('lore-0-trigger'),
   document.getElementById('lore-1-trigger'),
+  document.getElementById('lore-2-trigger'),
 ];
 const loreSharedInputs = [
   document.getElementById('lore-0-shared'),
   document.getElementById('lore-1-shared'),
+  document.getElementById('lore-2-shared'),
 ];
+const loreFreeTitleInput = document.getElementById('lore-free-title');
+const loreFreeTextInput = document.getElementById('lore-free-text');
 const styleToneInput = document.getElementById('style-tone');
 const styleViewpointInput = document.getElementById('style-viewpoint');
 const styleTempoInput = document.getElementById('style-tempo');
@@ -60,10 +68,17 @@ const introOpeningInput = document.getElementById('intro-opening');
 const introSituationInput = document.getElementById('intro-situation');
 const introFirstCharacterInput = document.getElementById('intro-first-character');
 const introDirectionInput = document.getElementById('intro-direction');
+const endingSummaryInput = document.getElementById('ending-summary');
+const endingStateInput = document.getElementById('ending-state');
+const endingLineInput = document.getElementById('ending-line');
 const summaryTitleInput = document.getElementById('summary-title');
 const summaryDescriptionInput = document.getElementById('summary-description');
 const summaryTagsInput = document.getElementById('summary-tags');
 const summaryCopyInput = document.getElementById('summary-copy');
+const flowTitleInput = document.getElementById('flow-title');
+const flowDescriptionInput = document.getElementById('flow-description');
+const flowShowCharactersInput = document.getElementById('flow-show-characters');
+const flowShowImagesInput = document.getElementById('flow-show-images');
 const detailForbiddenInput = document.getElementById('detail-forbidden');
 const detailAutocorrectInput = document.getElementById('detail-autocorrect');
 const detailTriggerInput = document.getElementById('detail-trigger');
@@ -93,12 +108,14 @@ function createDefaultStorySettings() {
         personality: '落ち着いていて、状況を観察してから動く',
         voice: '短く、穏やかに話す',
         relation: '主人公',
+        imageUrl: '',
       },
       {
         name: '相手',
         personality: '言葉の端々に本音がにじむ',
         voice: '少し砕けた口調',
         relation: '会話相手',
+        imageUrl: '',
       },
     ],
     loreEntries: [
@@ -114,7 +131,17 @@ function createDefaultStorySettings() {
         trigger: 'キーワード一致時',
         shared: true,
       },
+      {
+        keyword: '世界の掟',
+        description: '物語全体にかかる大きなルールや背景設定をまとめる。',
+        trigger: '常時参照',
+        shared: true,
+      },
     ],
+    loreFree: {
+      title: '',
+      text: '',
+    },
     style: {
       tone: '落ち着いた',
       viewpoint: '三人称',
@@ -127,11 +154,22 @@ function createDefaultStorySettings() {
       firstCharacter: 'ユウ',
       direction: '会話から始める',
     },
+    ending: {
+      summary: '',
+      state: '',
+      line: '',
+    },
     summary: {
       title: '',
       description: '',
       tags: '',
       copy: '',
+    },
+    flow: {
+      title: '登場人物',
+      description: '会話中に参照する人物情報をまとめる',
+      showCharacters: true,
+      showImages: true,
     },
     detail: {
       forbidden: '',
@@ -154,6 +192,7 @@ function normalizeStorySettings(raw) {
         personality: typeof item?.personality === 'string' ? item.personality : fallback.personality,
         voice: typeof item?.voice === 'string' ? item.voice : fallback.voice,
         relation: typeof item?.relation === 'string' ? item.relation : fallback.relation,
+        imageUrl: typeof item?.imageUrl === 'string' ? item.imageUrl : fallback.imageUrl || '',
       };
     }),
     loreEntries: defaults.loreEntries.map((fallback, index) => {
@@ -165,6 +204,10 @@ function normalizeStorySettings(raw) {
         shared: typeof item?.shared === 'boolean' ? item.shared : fallback.shared,
       };
     }),
+    loreFree: {
+      title: typeof source.loreFree?.title === 'string' ? source.loreFree.title : defaults.loreFree.title,
+      text: typeof source.loreFree?.text === 'string' ? source.loreFree.text : defaults.loreFree.text,
+    },
     style: {
       tone: typeof source.style?.tone === 'string' ? source.style.tone : defaults.style.tone,
       viewpoint: typeof source.style?.viewpoint === 'string' ? source.style.viewpoint : defaults.style.viewpoint,
@@ -179,11 +222,22 @@ function normalizeStorySettings(raw) {
         : defaults.intro.firstCharacter,
       direction: typeof source.intro?.direction === 'string' ? source.intro.direction : defaults.intro.direction,
     },
+    ending: {
+      summary: typeof source.ending?.summary === 'string' ? source.ending.summary : defaults.ending.summary,
+      state: typeof source.ending?.state === 'string' ? source.ending.state : defaults.ending.state,
+      line: typeof source.ending?.line === 'string' ? source.ending.line : defaults.ending.line,
+    },
     summary: {
       title: typeof source.summary?.title === 'string' ? source.summary.title : defaults.summary.title,
       description: typeof source.summary?.description === 'string' ? source.summary.description : defaults.summary.description,
       tags: typeof source.summary?.tags === 'string' ? source.summary.tags : defaults.summary.tags,
       copy: typeof source.summary?.copy === 'string' ? source.summary.copy : defaults.summary.copy,
+    },
+    flow: {
+      title: typeof source.flow?.title === 'string' ? source.flow.title : defaults.flow.title,
+      description: typeof source.flow?.description === 'string' ? source.flow.description : defaults.flow.description,
+      showCharacters: typeof source.flow?.showCharacters === 'boolean' ? source.flow.showCharacters : defaults.flow.showCharacters,
+      showImages: typeof source.flow?.showImages === 'boolean' ? source.flow.showImages : defaults.flow.showImages,
     },
     detail: {
       forbidden: typeof source.detail?.forbidden === 'string' ? source.detail.forbidden : defaults.detail.forbidden,
@@ -195,25 +249,29 @@ function normalizeStorySettings(raw) {
 }
 
 function createDefaultState() {
-  const plot = createPlot('失われた街');
+  const title = '失われた街';
+  const description = '物語の説明をここに入力してください。';
   return {
     chapter: 1,
     scene: 1,
     pov: 'You',
-    theme: '失われた街',
+    theme: title,
+    description,
     lines: [],
     entries: [],
     activeTab: 'basic',
-    plot,
+    plot: createPlot(title, description),
     storySettings: createDefaultStorySettings(),
   };
 }
 
-function createPlot(theme) {
-  const title = theme || '失われた街';
-  const premise = `${title} を舞台に、会話で状況が進む物語をローカルで進行する。`;
+function createPlot(title, description) {
+  const plotTitle = title || '失われた街';
+  const premise = description?.trim()
+    ? description.trim()
+    : `${plotTitle} を舞台に、会話で状況が進む物語をローカルで進行する。`;
   return {
-    title,
+    title: plotTitle,
     premise,
     rules: [
       '会話1回につき、物語は1段階だけ進む',
@@ -239,6 +297,9 @@ function loadState() {
       scene: Number.isInteger(parsed.scene) && parsed.scene > 0 ? parsed.scene : 1,
       pov: typeof parsed.pov === 'string' && parsed.pov.trim() ? parsed.pov : 'You',
       theme: typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '失われた街',
+      description: typeof parsed.description === 'string'
+        ? parsed.description
+        : (typeof parsed.plot?.premise === 'string' ? parsed.plot.premise : ''),
       lines: Array.isArray(parsed.lines) ? parsed.lines.filter((line) => typeof line === 'string') : [],
       entries: Array.isArray(parsed.entries)
         ? parsed.entries
@@ -254,16 +315,20 @@ function loadState() {
       storySettings: normalizeStorySettings(parsed.storySettings ?? parsed.settings ?? parsed),
       plot: parsed.plot && typeof parsed.plot === 'object'
         ? {
-            title: typeof parsed.plot.title === 'string' && parsed.plot.title.trim() ? parsed.plot.title.trim() : (typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '失われた街'),
+            title: typeof parsed.plot.title === 'string' && parsed.plot.title.trim()
+              ? parsed.plot.title.trim()
+              : (typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '失われた街'),
             premise: typeof parsed.plot.premise === 'string' && parsed.plot.premise.trim()
               ? parsed.plot.premise.trim()
-              : `${typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '物語'} を舞台に、会話で状況が進む。`,
+              : (typeof parsed.description === 'string' && parsed.description.trim()
+                ? parsed.description.trim()
+                : `${typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '物語'} を舞台に、会話で状況が進む。`),
             rules: Array.isArray(parsed.plot.rules) && parsed.plot.rules.length > 0
               ? parsed.plot.rules.filter((rule) => typeof rule === 'string')
-              : createPlot(parsed.theme || '失われた街').rules,
+              : createPlot(parsed.theme || '失われた街', parsed.description || '').rules,
             cast: Array.isArray(parsed.plot.cast) && parsed.plot.cast.length > 0
               ? parsed.plot.cast.filter((name) => typeof name === 'string')
-              : createPlot(parsed.theme || '失われた街').cast,
+              : createPlot(parsed.theme || '失われた街', parsed.description || '').cast,
             currentBeat: typeof parsed.plot.currentBeat === 'string' && parsed.plot.currentBeat.trim()
               ? parsed.plot.currentBeat.trim()
               : '導入',
@@ -271,7 +336,10 @@ function loadState() {
               ? parsed.plot.nextBeat.trim()
               : '未定',
           }
-        : createPlot(typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '失われた街'),
+        : createPlot(
+            typeof parsed.theme === 'string' && parsed.theme.trim() ? parsed.theme.trim() : '失われた街',
+            typeof parsed.description === 'string' ? parsed.description : '',
+          ),
     };
   } catch {
     return createDefaultState();
@@ -424,14 +492,24 @@ function buildStoryPrompt(userInput) {
   const settings = state.storySettings || createDefaultStorySettings();
   const protagonist = settings.characters[0]?.name?.trim() || '主人公';
   const counterpart = settings.characters[1]?.name?.trim() || '相手';
-  const theme = state.theme || '失われた街';
-  const plot = state.plot || createPlot(theme);
+  const title = state.theme || '失われた街';
+  const description = state.description || state.plot?.premise || '';
+  const plot = state.plot || createPlot(title, description);
   const opening = settings.intro.opening?.trim() || 'なし';
   const situation = settings.intro.situation?.trim() || 'なし';
   const summaryTitle = settings.summary.title?.trim() || 'なし';
   const summaryDescription = settings.summary.description?.trim() || 'なし';
   const summaryTags = settings.summary.tags?.trim() || 'なし';
   const summaryCopy = settings.summary.copy?.trim() || 'なし';
+  const flowTitle = settings.flow?.title?.trim() || '登場人物';
+  const flowDescription = settings.flow?.description?.trim() || 'なし';
+  const flowCharacters = settings.flow?.showCharacters ? '有効' : '無効';
+  const flowImages = settings.flow?.showImages ? '有効' : '無効';
+  const endingSummary = settings.ending?.summary?.trim() || 'なし';
+  const endingState = settings.ending?.state?.trim() || 'なし';
+  const endingLine = settings.ending?.line?.trim() || 'なし';
+  const loreFreeTitle = settings.loreFree?.title?.trim() || 'なし';
+  const loreFreeText = settings.loreFree?.text?.trim() || 'なし';
   const forbidden = settings.detail.forbidden?.trim() || 'なし';
   const trigger = settings.detail.trigger?.trim() || 'なし';
   const tone = settings.style.tone?.trim() || '自然';
@@ -454,13 +532,14 @@ function buildStoryPrompt(userInput) {
     `- 応答長: ${length}`,
     '',
     '【物語設定】',
-    `テーマ: ${theme}`,
+    `タイトル: ${title}`,
+    `説明: ${description || 'なし'}`,
     `章: ${state.chapter}`,
     `シーン: ${state.scene}`,
     `主人公: ${protagonist}`,
     `相手役: ${counterpart}`,
-    `タイトル: ${plot.title}`,
-    `概要: ${plot.premise}`,
+    `PLOTタイトル: ${plot.title}`,
+    `PLOT説明: ${plot.premise}`,
     '',
     '【キャラクター】',
     settings.characters
@@ -473,16 +552,31 @@ function buildStoryPrompt(userInput) {
     '【裏設定】',
     loreSection || 'なし',
     '',
+    '【自由記述の裏設定】',
+    `タイトル: ${loreFreeTitle}`,
+    `本文: ${loreFreeText}`,
+    '',
     '【開始条件】',
     `開始文: ${opening}`,
     `開始時の状況: ${situation}`,
     `導入の方向性: ${settings.intro.direction || '会話から始める'}`,
+    '',
+    '【エンディング】',
+    `方向性: ${endingSummary}`,
+    `最終状態: ${endingState}`,
+    `締めのひと言: ${endingLine}`,
     '',
     '【紹介】',
     `公開タイトル: ${summaryTitle}`,
     `短い紹介文: ${summaryDescription}`,
     `タグ: ${summaryTags}`,
     `一言コピー: ${summaryCopy}`,
+    '',
+    '【FLOW】',
+    `表示タイトル: ${flowTitle}`,
+    `説明: ${flowDescription}`,
+    `登場人物: ${flowCharacters}`,
+    `画像: ${flowImages}`,
     '',
     '【制御】',
     `禁止事項: ${forbidden}`,
@@ -507,6 +601,7 @@ function syncFormState() {
       personality: characterPersonalityInputs[index]?.value.trim() || '',
       voice: characterVoiceInputs[index]?.value.trim() || '',
       relation: characterRelationInputs[index]?.value.trim() || '',
+      imageUrl: characterImageInputs[index]?.value.trim() || '',
     })),
     loreEntries: loreKeywordInputs.map((keywordInput, index) => ({
       keyword: keywordInput?.value.trim() || '',
@@ -514,6 +609,10 @@ function syncFormState() {
       trigger: loreTriggerInputs[index]?.value.trim() || '',
       shared: Boolean(loreSharedInputs[index]?.checked),
     })),
+    loreFree: {
+      title: loreFreeTitleInput?.value.trim() || '',
+      text: loreFreeTextInput?.value || '',
+    },
     style: {
       tone: styleToneInput?.value.trim() || '',
       viewpoint: styleViewpointInput?.value || '三人称',
@@ -526,11 +625,22 @@ function syncFormState() {
       firstCharacter: introFirstCharacterInput?.value.trim() || '',
       direction: introDirectionInput?.value || '会話から始める',
     },
+    ending: {
+      summary: endingSummaryInput?.value || '',
+      state: endingStateInput?.value || '',
+      line: endingLineInput?.value || '',
+    },
     summary: {
       title: summaryTitleInput?.value.trim() || '',
       description: summaryDescriptionInput?.value || '',
       tags: summaryTagsInput?.value.trim() || '',
       copy: summaryCopyInput?.value.trim() || '',
+    },
+    flow: {
+      title: flowTitleInput?.value.trim() || '',
+      description: flowDescriptionInput?.value || '',
+      showCharacters: Boolean(flowShowCharactersInput?.checked),
+      showImages: Boolean(flowShowImagesInput?.checked),
     },
     detail: {
       forbidden: detailForbiddenInput?.value || '',
@@ -552,6 +662,7 @@ function renderFormState() {
     if (characterPersonalityInputs[index]) characterPersonalityInputs[index].value = character.personality;
     if (characterVoiceInputs[index]) characterVoiceInputs[index].value = character.voice;
     if (characterRelationInputs[index]) characterRelationInputs[index].value = character.relation;
+    if (characterImageInputs[index]) characterImageInputs[index].value = character.imageUrl || '';
   });
   settings.loreEntries.forEach((entry, index) => {
     if (loreKeywordInputs[index]) loreKeywordInputs[index].value = entry.keyword;
@@ -559,6 +670,8 @@ function renderFormState() {
     if (loreTriggerInputs[index]) loreTriggerInputs[index].value = entry.trigger;
     if (loreSharedInputs[index]) loreSharedInputs[index].checked = entry.shared;
   });
+  if (loreFreeTitleInput) loreFreeTitleInput.value = settings.loreFree?.title || '';
+  if (loreFreeTextInput) loreFreeTextInput.value = settings.loreFree?.text || '';
 
   if (styleToneInput) styleToneInput.value = settings.style.tone;
   if (styleViewpointInput) styleViewpointInput.value = settings.style.viewpoint;
@@ -570,10 +683,19 @@ function renderFormState() {
   if (introFirstCharacterInput) introFirstCharacterInput.value = settings.intro.firstCharacter;
   if (introDirectionInput) introDirectionInput.value = settings.intro.direction;
 
+  if (endingSummaryInput) endingSummaryInput.value = settings.ending?.summary || '';
+  if (endingStateInput) endingStateInput.value = settings.ending?.state || '';
+  if (endingLineInput) endingLineInput.value = settings.ending?.line || '';
+
   if (summaryTitleInput) summaryTitleInput.value = settings.summary.title;
   if (summaryDescriptionInput) summaryDescriptionInput.value = settings.summary.description;
   if (summaryTagsInput) summaryTagsInput.value = settings.summary.tags;
   if (summaryCopyInput) summaryCopyInput.value = settings.summary.copy;
+
+  if (flowTitleInput) flowTitleInput.value = settings.flow?.title || '';
+  if (flowDescriptionInput) flowDescriptionInput.value = settings.flow?.description || '';
+  if (flowShowCharactersInput) flowShowCharactersInput.checked = Boolean(settings.flow?.showCharacters);
+  if (flowShowImagesInput) flowShowImagesInput.checked = Boolean(settings.flow?.showImages);
 
   if (detailForbiddenInput) detailForbiddenInput.value = settings.detail.forbidden;
   if (detailAutocorrectInput) detailAutocorrectInput.checked = settings.detail.autocorrect;
@@ -611,9 +733,12 @@ function setActiveTab(tabName) {
 }
 
 function renderHeader() {
-  chapterLabel.textContent = `Chapter ${state.chapter}`;
-  sceneLabel.textContent = `Scene ${state.scene}`;
-  povLabel.textContent = state.pov;
+  if (chapterLabel) {
+    chapterLabel.value = state.theme || '';
+  }
+  if (sceneLabel) {
+    sceneLabel.value = state.description || '';
+  }
   statusBadge.textContent = state.plot?.currentBeat ? `beat: ${state.plot.currentBeat}` : 'beat: idle';
   if (nextBeatBadge) {
     nextBeatBadge.textContent = state.plot?.nextBeat ? `next: ${state.plot.nextBeat}` : 'next: -';
@@ -621,7 +746,7 @@ function renderHeader() {
 }
 
 function renderPlot() {
-  const plot = state.plot || createPlot(state.theme);
+  const plot = state.plot || createPlot(state.theme, state.description);
   plotTitle.textContent = plot.title;
   plotPremise.textContent = plot.premise;
   plotRules.innerHTML = '';
@@ -636,6 +761,10 @@ function renderPlot() {
 }
 
 function renderLog() {
+  if (!storyLog) {
+    return;
+  }
+
   storyLog.innerHTML = '';
 
   for (const entry of state.entries) {
@@ -798,6 +927,10 @@ async function generateStoryResponse(input) {
 }
 
 async function addLine() {
+  if (!lineInput) {
+    return;
+  }
+
   const text = lineInput.value.trim();
   if (!text) {
     return;
@@ -824,14 +957,16 @@ function nextScene() {
 }
 
 function resetStory() {
-  const theme = themeInput.value.trim() || '失われた街';
+  const title = chapterLabel?.value.trim() || '失われた街';
+  const description = sceneLabel?.value.trim() || '';
   state.chapter = 1;
   state.scene = 1;
   state.pov = 'You';
-  state.theme = theme;
+  state.theme = title;
+  state.description = description;
   state.lines = [];
   state.entries = [];
-  state.plot = createPlot(theme);
+  state.plot = createPlot(title, description);
   renderLog();
   addLog('物語の開始地点に戻りました。', 'story');
   renderPlot();
@@ -840,9 +975,11 @@ function resetStory() {
 }
 
 function regeneratePlot() {
-  const theme = themeInput.value.trim() || state.theme || '失われた街';
-  state.theme = theme;
-  state.plot = createPlot(theme);
+  const title = chapterLabel?.value.trim() || state.theme || '失われた街';
+  const description = sceneLabel?.value.trim() || state.description || '';
+  state.theme = title;
+  state.description = description;
+  state.plot = createPlot(title, description);
   state.plot.currentBeat = '導入';
   state.plot.nextBeat = '未定';
   renderPlot();
@@ -850,33 +987,50 @@ function regeneratePlot() {
   saveState();
 }
 
-themeInput.addEventListener('input', () => {
-  state.theme = themeInput.value.trim();
+chapterLabel?.addEventListener('input', () => {
+  state.theme = chapterLabel.value.trim();
   if (state.plot) {
     state.plot.title = state.theme || '失われた街';
-    state.plot.premise = `${state.plot.title} を舞台に、会話で状況が進む物語をローカルで進行する。`;
+    if (!state.description?.trim()) {
+      state.plot.premise = `${state.plot.title} を舞台に、会話で状況が進む物語をローカルで進行する。`;
+    }
   }
   renderPlot();
   renderHeader();
   saveState();
 });
 
-addLineBtn.addEventListener('click', () => {
+sceneLabel?.addEventListener('input', () => {
+  state.description = sceneLabel.value;
+  if (state.plot) {
+    state.plot.premise = state.description?.trim()
+      ? state.description.trim()
+      : `${state.theme || '失われた街'} を舞台に、会話で状況が進む物語をローカルで進行する。`;
+  }
+  renderPlot();
+  renderHeader();
+  saveState();
+});
+
+addLineBtn?.addEventListener('click', () => {
   void addLine();
 });
-nextSceneBtn.addEventListener('click', nextScene);
-resetBtn.addEventListener('click', resetStory);
-plotResetBtn.addEventListener('click', regeneratePlot);
+nextSceneBtn?.addEventListener('click', nextScene);
+resetBtn?.addEventListener('click', resetStory);
+plotResetBtn?.addEventListener('click', regeneratePlot);
 
 [
   ...characterNameInputs,
   ...characterPersonalityInputs,
   ...characterVoiceInputs,
   ...characterRelationInputs,
+  ...characterImageInputs,
   ...loreKeywordInputs,
   ...loreDescriptionInputs,
   ...loreTriggerInputs,
   ...loreSharedInputs,
+  loreFreeTitleInput,
+  loreFreeTextInput,
   styleToneInput,
   styleViewpointInput,
   styleTempoInput,
@@ -885,10 +1039,17 @@ plotResetBtn.addEventListener('click', regeneratePlot);
   introSituationInput,
   introFirstCharacterInput,
   introDirectionInput,
+  endingSummaryInput,
+  endingStateInput,
+  endingLineInput,
   summaryTitleInput,
   summaryDescriptionInput,
   summaryTagsInput,
   summaryCopyInput,
+  flowTitleInput,
+  flowDescriptionInput,
+  flowShowCharactersInput,
+  flowShowImagesInput,
   detailForbiddenInput,
   detailAutocorrectInput,
   detailTriggerInput,
@@ -908,14 +1069,13 @@ for (const button of tabButtons) {
   });
 }
 
-lineInput.addEventListener('keydown', (event) => {
+lineInput?.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
     event.preventDefault();
-    addLine();
+    void addLine();
   }
 });
 
-themeInput.value = state.theme;
 renderPlot();
 renderHeader();
 renderFormState();

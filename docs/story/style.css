@@ -58,6 +58,41 @@ textarea {
   padding: 32px 0 56px;
 }
 
+.mobile-nav {
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  display: none;
+  gap: 8px;
+  width: min(1200px, calc(100% - 20px));
+  margin: 0 auto 14px;
+  padding: 10px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(6, 11, 21, 0.92);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-nav-item {
+  flex: 1 1 0;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  font-weight: 700;
+}
+
+.mobile-nav-item.active {
+  color: var(--text);
+  border-color: rgba(120, 211, 255, 0.35);
+  background: linear-gradient(135deg, rgba(120, 211, 255, 0.2), rgba(138, 240, 193, 0.14));
+}
+
 .hero,
 .panel {
   border: 1px solid var(--line);
@@ -69,6 +104,14 @@ textarea {
 .hero {
   padding: 28px;
   border-radius: 28px;
+}
+
+.story-hero-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .eyebrow,
@@ -150,11 +193,460 @@ h1 {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.home-feed {
+  margin-top: 18px;
+}
+
+.feed-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.feed-card {
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 17, 31, 0.46);
+  box-shadow: var(--shadow);
+}
+
+.feed-card[data-active="true"] {
+  border-color: rgba(120, 211, 255, 0.45);
+  box-shadow: 0 24px 60px rgba(120, 211, 255, 0.12);
+}
+
+.feed-thumb {
+  min-height: 220px;
+  background-size: cover;
+  background-position: center;
+}
+
+.feed-thumb-a {
+  background:
+    linear-gradient(180deg, rgba(9, 15, 28, 0.08), rgba(9, 15, 28, 0.48)),
+    radial-gradient(circle at 35% 28%, rgba(255, 159, 171, 0.9), transparent 22%),
+    linear-gradient(135deg, #d1c0b4 0%, #72686e 45%, #1a1b24 100%);
+}
+
+.feed-thumb-b {
+  background:
+    linear-gradient(180deg, rgba(9, 15, 28, 0.08), rgba(9, 15, 28, 0.48)),
+    radial-gradient(circle at 70% 24%, rgba(104, 214, 255, 0.9), transparent 20%),
+    linear-gradient(135deg, #f0ddba 0%, #a08a67 38%, #24354d 100%);
+}
+
+.feed-thumb-c {
+  background:
+    linear-gradient(180deg, rgba(9, 15, 28, 0.08), rgba(9, 15, 28, 0.48)),
+    radial-gradient(circle at 68% 36%, rgba(255, 219, 143, 0.9), transparent 18%),
+    linear-gradient(135deg, #1f2e39 0%, #4a6f4b 44%, #191d22 100%);
+}
+
+.feed-thumb-d {
+  background:
+    linear-gradient(180deg, rgba(9, 15, 28, 0.08), rgba(9, 15, 28, 0.48)),
+    radial-gradient(circle at 42% 28%, rgba(255, 199, 143, 0.9), transparent 20%),
+    linear-gradient(135deg, #6d563e 0%, #3b2d27 42%, #11131a 100%);
+}
+
+.feed-body {
+  padding: 16px 16px 18px;
+}
+
+.feed-body h3 {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.feed-body p {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 0.94rem;
+}
+
+.story-list {
+  display: grid;
+  gap: 10px;
+}
+
+.story-list-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.story-list-item[data-active="true"] {
+  border-color: rgba(120, 211, 255, 0.45);
+  background: rgba(120, 211, 255, 0.1);
+}
+
+.story-list-thumb {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border-radius: 16px;
+  background-size: cover;
+  background-position: center;
+}
+
+.story-list-body {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.story-list-body h3 {
+  font-size: 0.98rem;
+  line-height: 1.4;
+}
+
+.story-list-body p {
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.story-list-action {
+  display: inline-flex;
+  margin-top: 8px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.talk-context {
+  display: grid;
+  gap: 12px;
+}
+
+.talk-context-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.talk-context-head h2 {
+  margin-top: 8px;
+  font-size: 1.25rem;
+}
+
+.talk-context-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.talk-context-description {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.talk-opening {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.talk-opening p:last-child {
+  margin-top: 8px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.story-picker {
+  display: grid;
+  gap: 14px;
+}
+
+.story-picker-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.story-picker-head h2 {
+  margin-top: 8px;
+  font-size: 1.05rem;
+}
+
+.story-picker-note {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.talk-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.talk-log {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-height: 320px;
+  max-height: none;
+  overflow: auto;
+  padding-right: 6px;
+  padding-bottom: 8px;
+}
+
+.talk-empty {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.talk-open-card {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(120, 211, 255, 0.1);
+  border: 1px solid rgba(120, 211, 255, 0.18);
+}
+
+.talk-open-card div:last-child {
+  margin-top: 8px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.talk-spacer {
+  height: 120px;
+}
+
+.talk-hero-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.talk-flow-toggle {
+  min-width: 92px;
+}
+
+.talk-flow-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+body.talk-flow-open {
+  overflow: hidden;
+}
+
+body.talk-flow-open .talk-flow-layer {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.talk-flow-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 8, 16, 0.58);
+  backdrop-filter: blur(4px);
+}
+
+.talk-flow-sheet {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 10px;
+  bottom: 170px;
+  overflow: auto;
+  border-radius: 24px;
+  background: rgba(6, 11, 21, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+  transform: translateY(-12px);
+  transition: transform 0.2s ease;
+}
+
+body.talk-flow-open .talk-flow-sheet {
+  transform: translateY(0);
+}
+
+.talk-flow-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.talk-flow-description {
+  margin-top: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.talk-flow-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.talk-flow-empty {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.talk-page .page {
+  min-height: 100dvh;
+}
+
+body.talk-page .app-shell {
+  min-height: 100dvh;
+}
+
+.talk-flow-card {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.talk-flow-avatar {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: #08111f;
+  background: linear-gradient(135deg, rgba(138, 240, 193, 0.9), rgba(120, 211, 255, 0.9));
+  background-size: cover;
+  background-position: center;
+}
+
+.talk-flow-avatar.has-image {
+  color: transparent;
+}
+
+.talk-flow-card-body {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.talk-flow-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.talk-flow-card-body p {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.talk-flow-relation {
+  color: var(--accent);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.talk-composer {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.talk-field {
+  flex: 1 1 320px;
+  margin-top: 0;
+}
+
+.talk-field textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.talk-dock {
+  display: grid;
+  gap: 8px;
+}
+
+.mypage-card {
+  padding: 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 17, 31, 0.46);
+  box-shadow: var(--shadow);
+}
+
+.mypage-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mypage-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(138, 240, 193, 0.92), rgba(77, 184, 255, 0.92));
+  color: #08111f;
+  font-size: 1.8rem;
+  font-weight: 900;
+}
+
+.mypage-profile h3 {
+  font-size: 1.05rem;
+}
+
+.mypage-profile p {
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .story-shell {
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);
   gap: 18px;
   margin-top: 18px;
+  flex: 1 1 auto;
 }
 
 .panel {
@@ -285,6 +777,23 @@ h1 {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.state-item-input {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.state-item-input input,
+.state-item-input textarea {
+  margin-top: 0;
+  width: 100%;
+}
+
+.state-item-input textarea {
+  min-height: 104px;
+  resize: vertical;
 }
 
 .state-item span {
@@ -483,12 +992,12 @@ textarea:focus {
   flex-wrap: wrap;
 }
 
-.story-message-field {
+.story-talk-field {
   flex: 1 1 320px;
   margin-top: 0;
 }
 
-.story-message-field textarea {
+.story-talk-field textarea {
   min-height: 96px;
   resize: vertical;
 }
@@ -559,6 +1068,10 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .feed-grid {
+    grid-template-columns: 1fr;
+  }
+
   .mini-grid,
   .story-result-grid {
     grid-template-columns: 1fr;
@@ -566,5 +1079,121 @@ textarea:focus {
 
   .bubble {
     max-width: 92%;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    min-height: 100dvh;
+    overflow-y: auto;
+  }
+
+  .page {
+    width: min(100% - 20px, 1200px);
+    min-height: auto;
+    padding: 10px 0 110px;
+  }
+
+  .hero {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .story-hero-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .talk-hero-row {
+    flex-wrap: wrap;
+  }
+
+  .story-shell {
+    margin-top: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .story-composer {
+    align-items: stretch;
+  }
+
+  .talk-composer {
+    align-items: stretch;
+  }
+
+  .story-talk-field {
+    flex-basis: 100%;
+  }
+
+  .talk-field {
+    flex-basis: 100%;
+  }
+
+  .story-log {
+    min-height: 280px;
+    max-height: none;
+  }
+
+  .talk-log {
+    min-height: 0;
+    max-height: none;
+  }
+
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+    margin: 0;
+    border-radius: 20px;
+  }
+
+  body.talk-page .talk-dock {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    z-index: 40;
+    padding: 10px;
+    border-radius: 22px;
+    background: rgba(6, 11, 21, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+
+  body.talk-page .talk-dock .mobile-nav {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    margin: 0;
+  }
+
+  body.talk-page .talk-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-bottom: 0;
+  }
+
+  body.talk-page .page {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100dvh;
+    min-height: 100dvh;
+    padding-bottom: 214px;
+  }
+
+  body.talk-page .talk-log {
+    min-height: 0;
+    max-height: none;
+  }
+
+  body.talk-page .talk-spacer {
+    height: 160px;
   }
 }

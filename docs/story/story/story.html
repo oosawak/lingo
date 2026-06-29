@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>lingo story - story</title>
+    <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../style.css" />
+    <script type="module" src="../main.js"></script>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div class="story-hero-row">
+          <div class="eyebrow">STORY / STORY</div>
+          <div class="story-status">
+            <div class="badge" id="status-badge">beat: idle</div>
+            <div class="badge badge-secondary" id="next-beat-badge">next: -</div>
+            <div class="badge badge-secondary" id="llm-status-badge">llm: idle</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="story-shell">
+        <aside class="panel sidebar">
+          <p class="kicker">State</p>
+          <h2>物語状態</h2>
+
+          <div class="story-tabs" role="tablist" aria-label="story editor tabs">
+            <button class="story-tab active" type="button" data-story-tab="basic" aria-selected="true">基本設定</button>
+            <button class="story-tab" type="button" data-story-tab="character" aria-selected="false">キャラクター</button>
+            <button class="story-tab" type="button" data-story-tab="lore" aria-selected="false">裏設定</button>
+            <button class="story-tab" type="button" data-story-tab="style" aria-selected="false">スタイル</button>
+            <button class="story-tab" type="button" data-story-tab="intro" aria-selected="false">イントロ</button>
+            <button class="story-tab" type="button" data-story-tab="ending" aria-selected="false">エンディング</button>
+            <button class="story-tab" type="button" data-story-tab="summary" aria-selected="false">紹介</button>
+            <button class="story-tab" type="button" data-story-tab="flow" aria-selected="false">FLOW</button>
+            <button class="story-tab" type="button" data-story-tab="detail" aria-selected="false">詳細設定</button>
+          </div>
+
+          <div class="story-panels">
+            <section class="story-panel active" data-story-panel="basic">
+              <div class="state-grid">
+                <label class="state-item state-item-input">
+                  <span>TITLE</span>
+                  <input id="chapter-label" type="text" placeholder="タイトル" />
+                </label>
+                <label class="state-item state-item-input">
+                  <span>DESCRIPTION</span>
+                  <textarea id="scene-label" rows="4" placeholder="説明"></textarea>
+                </label>
+              </div>
+
+              <div class="plot-card">
+                <div class="plot-head">
+                  <p class="kicker">Plot</p>
+                  <button class="button button-secondary plot-reset-btn" id="plot-reset-btn" type="button">再生成</button>
+                </div>
+                <div class="plot-title" id="plot-title">失われた街</div>
+                <p class="plot-premise" id="plot-premise"></p>
+                <ul class="plot-list" id="plot-rules"></ul>
+              </div>
+
+              <div class="prompt-card">
+                <div class="plot-head">
+                  <p class="kicker">Prompt</p>
+                  <span class="prompt-hint">LLM に渡す現在の内容</span>
+                </div>
+                <textarea id="prompt-preview" class="prompt-preview" rows="12" readonly></textarea>
+              </div>
+
+            </section>
+
+            <section class="story-panel" data-story-panel="character">
+              <div class="state-grid">
+                <div class="state-item">
+                  <span>Characters</span>
+                  <strong>主要キャラクター</strong>
+                </div>
+              </div>
+              <div class="entity-stack">
+                <div class="entity-card">
+                  <div class="entity-head">
+                    <strong>Character 1</strong>
+                    <span class="entity-tag">主人公</span>
+                  </div>
+                  <label class="field">
+                    <span>名前</span>
+                    <input id="character-0-name" type="text" placeholder="例: ユウ" />
+                  </label>
+                  <label class="field">
+                    <span>性格</span>
+                    <textarea id="character-0-personality" rows="4" placeholder="落ち着いていて、状況を観察してから動く"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>口調</span>
+                    <textarea id="character-0-voice" rows="3" placeholder="短く、穏やかに話す"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>関係性</span>
+                    <textarea id="character-0-relation" rows="3" placeholder="主人公"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>画像URL</span>
+                    <input id="character-0-image" type="url" placeholder="https://..." />
+                  </label>
+                </div>
+
+                <div class="entity-card">
+                  <div class="entity-head">
+                    <strong>Character 2</strong>
+                    <span class="entity-tag">相手役</span>
+                  </div>
+                  <label class="field">
+                    <span>名前</span>
+                    <input id="character-1-name" type="text" placeholder="例: アリス" />
+                  </label>
+                  <label class="field">
+                    <span>性格</span>
+                    <textarea id="character-1-personality" rows="4" placeholder="言葉の端々に本音がにじむ"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>口調</span>
+                    <textarea id="character-1-voice" rows="3" placeholder="少し砕けた口調"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>関係性</span>
+                    <textarea id="character-1-relation" rows="3" placeholder="会話相手"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>画像URL</span>
+                    <input id="character-1-image" type="url" placeholder="https://..." />
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section class="story-panel" data-story-panel="lore">
+              <div class="state-grid">
+                <div class="state-item">
+                  <span>Lore</span>
+                  <strong>大きな裏設定</strong>
+                </div>
+              </div>
+              <p class="tab-note">定型の裏設定3つと、自由記述の裏設定1つを登録します。</p>
+              <div class="entity-stack">
+                <div class="entity-card">
+                  <div class="entity-head">
+                    <strong>Lore 1</strong>
+                    <span class="entity-tag">共有あり</span>
+                  </div>
+                  <label class="field">
+                    <span>裏設定名</span>
+                    <input id="lore-0-keyword" type="text" placeholder="例: マギア王国" />
+                  </label>
+                  <label class="field">
+                    <span>登録テキスト</span>
+                    <textarea id="lore-0-description" rows="6" placeholder="小説の抜粋や世界観データを入力"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>補足</span>
+                    <input id="lore-0-trigger" type="text" placeholder="必要ならメモを入れる" />
+                  </label>
+                  <label class="toggle-row">
+                    <input id="lore-0-shared" type="checkbox" checked />
+                    <span>共有する</span>
+                  </label>
+                </div>
+
+                <div class="entity-card">
+                  <div class="entity-head">
+                    <strong>Lore 2</strong>
+                    <span class="entity-tag">共有あり</span>
+                  </div>
+                  <label class="field">
+                    <span>裏設定名</span>
+                    <input id="lore-1-keyword" type="text" placeholder="例: 暗黒魔法の書" />
+                  </label>
+                  <label class="field">
+                    <span>登録テキスト</span>
+                    <textarea id="lore-1-description" rows="6" placeholder="小説の抜粋や世界観データを入力"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>補足</span>
+                    <input id="lore-1-trigger" type="text" placeholder="必要ならメモを入れる" />
+                  </label>
+                  <label class="toggle-row">
+                    <input id="lore-1-shared" type="checkbox" checked />
+                    <span>共有する</span>
+                  </label>
+                </div>
+
+                <div class="entity-card">
+                  <div class="entity-head">
+                    <strong>Lore 3</strong>
+                    <span class="entity-tag">共有あり</span>
+                  </div>
+                  <label class="field">
+                    <span>裏設定名</span>
+                    <input id="lore-2-keyword" type="text" placeholder="例: 世界の掟" />
+                  </label>
+                  <label class="field">
+                    <span>登録テキスト</span>
+                    <textarea id="lore-2-description" rows="6" placeholder="小説の抜粋や世界観データを入力"></textarea>
+                  </label>
+                  <label class="field">
+                    <span>補足</span>
+                    <input id="lore-2-trigger" type="text" placeholder="必要ならメモを入れる" />
+                  </label>
+                  <label class="toggle-row">
+                    <input id="lore-2-shared" type="checkbox" checked />
+                    <span>共有する</span>
+                  </label>
+                </div>
+
+                <div class="entity-card">
+                  <div class="entity-head">
+                    <strong>Lore 4</strong>
+                    <span class="entity-tag">自由記述</span>
+                  </div>
+                  <label class="field">
+                    <span>タイトル</span>
+                    <input id="lore-free-title" type="text" placeholder="自由記述の見出し" />
+                  </label>
+                  <label class="field">
+                    <span>本文</span>
+                    <textarea id="lore-free-text" rows="10" placeholder="小説本文や長い背景設定を入力"></textarea>
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section class="story-panel" data-story-panel="style">
+              <div class="state-grid">
+                <div class="state-item">
+                  <span>Style</span>
+                  <strong>文体設定</strong>
+                </div>
+              </div>
+              <label class="field">
+                <span>トーン</span>
+                <input id="style-tone" type="text" placeholder="落ち着いた / 軽快 / 緊張感のある" />
+              </label>
+              <div class="mini-grid">
+                <label class="field">
+                  <span>視点</span>
+                  <select id="style-viewpoint">
+                    <option value="一人称">一人称</option>
+                    <option value="二人称">二人称</option>
+                    <option value="三人称" selected>三人称</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>テンポ</span>
+                  <select id="style-tempo">
+                    <option value="速い">速い</option>
+                    <option value="自然" selected>自然</option>
+                    <option value="遅い">遅い</option>
+                  </select>
+                </label>
+              </div>
+              <label class="field">
+                <span>応答長</span>
+                <select id="style-length">
+                  <option value="短い">短い</option>
+                  <option value="中間">中間</option>
+                  <option value="長い">長い</option>
+                  <option value="自動" selected>自動</option>
+                </select>
+              </label>
+            </section>
+
+            <section class="story-panel" data-story-panel="intro">
+              <div class="state-grid">
+                <div class="state-item">
+                  <span>Intro</span>
+                  <strong>導入</strong>
+                </div>
+              </div>
+              <label class="field">
+                <span>冒頭</span>
+                <textarea id="intro-opening" rows="4" placeholder="物語の始まりを入力"></textarea>
+              </label>
+              <label class="field">
+                <span>状況</span>
+                <textarea id="intro-situation" rows="4" placeholder="どんな場面から始めるか"></textarea>
+              </label>
+              <label class="field">
+                <span>最初に出すキャラ</span>
+                <input id="intro-first-character" type="text" placeholder="ユウ" />
+              </label>
+              <label class="field">
+                <span>始め方</span>
+                <select id="intro-direction">
+                  <option value="会話から始める" selected>会話から始める</option>
+                  <option value="情景から始める">情景から始める</option>
+                  <option value="行動から始める">行動から始める</option>
+                </select>
+              </label>
+            </section>
+
+            <section class="story-panel" data-story-panel="ending">
+              <div class="state-grid">
+                <div class="state-item">
+                  <span>Ending</span>
+                  <strong>エンディング</strong>
+                </div>
+              </div>
+              <label class="field">
+                <span>結末の方向性</span>
+                <textarea id="ending-summary" rows="4" placeholder="どういう終わり方にしたいか"></textarea>
+              </label>
+              <label class="field">
+                <span>最後の状況</span>
+                <textarea id="ending-state" rows="4" placeholder="最後にどうなっているか"></textarea>
+              </label>
+              <label class="field">
+                <span>締めのひと言</span>
+                <textarea id="ending-line" rows="3" placeholder="最終話で入れたい一言"></textarea>
+              </label>
+            </section>
+
+            <section class="story-panel" data-story-panel="summary">
+              <div class="state-grid">
+                <div class="state-item">
+                  <span>Summary</span>
+                  <strong>紹介</strong>
+                </div>
+              </div>
+              <label class="field">
+                <span>公開タイトル</span>
+                <input id="summary-title" type="text" placeholder="物語タイトル" />
+              </label>
+              <label class="field">
+                <span>紹介文</span>
+                <textarea id="summary-description" rows="4" placeholder="短い紹介文を入力"></textarea>
+              </label>
+              <label class="field">
+                <span>タグ</span>
+                <input id="summary-tags" type="text" placeholder="#恋愛 #ミステリー" />
+              </label>
+              <label class="field">
+                <span>一言コピー</span>
+                <input id="summary-copy" type="text" placeholder="ひとことで魅力を伝える" />
+              </label>
+            </section>
+
+            <section class="story-panel" data-story-panel="flow">
+              <div class="state-grid">
+                <div class="state-item">
+                  <span>Flow</span>
+                  <strong>TALK 用の表示設定</strong>
+                </div>
+              </div>
+              <label class="field">
+                <span>FLOW タイトル</span>
+                <input id="flow-title" type="text" placeholder="登場人物 / FLOW" />
+              </label>
+              <label class="field">
+                <span>説明</span>
+                <textarea id="flow-description" rows="4" placeholder="TALK の上から出すドロワーに表示する説明"></textarea>
+              </label>
+              <label class="toggle-row">
+                <input id="flow-show-characters" type="checkbox" checked />
+                <span>登場人物を表示する</span>
+              </label>
+              <label class="toggle-row">
+                <input id="flow-show-images" type="checkbox" checked />
+                <span>画像を表示する</span>
+              </label>
+            </section>
+
+            <section class="story-panel" data-story-panel="detail">
+              <div class="state-grid">
+                <div class="state-item">
+                  <span>Detail</span>
+                  <strong>詳細設定</strong>
+                </div>
+              </div>
+              <label class="field">
+                <span>禁止事項</span>
+                <textarea id="detail-forbidden" rows="4" placeholder="避けたい表現や展開"></textarea>
+              </label>
+              <label class="field">
+                <span>発動キーワード</span>
+                <input id="detail-trigger" type="text" placeholder="特定の語で設定を強く反映" />
+              </label>
+              <label class="toggle-row">
+                <input id="detail-autocorrect" type="checkbox" checked />
+                <span>自動補正を有効にする</span>
+              </label>
+              <label class="toggle-row">
+                <input id="detail-save" type="checkbox" checked />
+                <span>保存する</span>
+              </label>
+            </section>
+          </div>
+        </aside>
+
+        <section class="panel story-main">
+          <article class="story-result-card" id="story-result-card">
+            <div class="story-result-head">
+              <p class="kicker">Result</p>
+              <span class="story-result-title" id="story-result-title">まだ生成されていません</span>
+            </div>
+            <div class="story-result-grid">
+              <div class="story-result-block">
+                <span>本文</span>
+                <p id="story-result-narration">会話を送るとここに物語本文が出ます。</p>
+              </div>
+              <div class="story-result-block">
+                <span>次の展開</span>
+                <p id="story-result-next-beat">-</p>
+              </div>
+              <div class="story-result-block">
+                <span>裏設定</span>
+                <p id="story-result-lore-hits">-</p>
+              </div>
+              <div class="story-result-block">
+                <span>次の指針</span>
+                <p id="story-result-dialogue-hint">-</p>
+              </div>
+            </div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <nav class="mobile-nav" aria-label="app tabs">
+      <a class="mobile-nav-item" href="../home/">HOME</a>
+      <a class="mobile-nav-item" href="../talk/">TALK</a>
+      <a class="mobile-nav-item active" href="./" aria-current="page">STORY</a>
+      <a class="mobile-nav-item" href="../mypage/">MY PAGE</a>
+    </nav>
+  </body>
+</html>
