@@ -15,6 +15,7 @@ const STORAGE_KEY = 'lingo.story.talk.log';
 const ENGINE_STORAGE_KEY = 'lingo.story.talk.engine';
 const STORY_STORAGE_KEY = 'lingo.story.state';
 const TALK_MODEL_CANDIDATES = [
+  { modelId: 'Xenova/Phi-3-mini-4k-instruct', task: 'text-generation' },
   { modelId: 'Xenova/TinyLlama-1.1B-Chat-v1.0', task: 'text-generation' },
   { modelId: 'Xenova/distilgpt2', task: 'text-generation' },
 ];
