@@ -398,6 +398,13 @@
         </aside>
 
         <section class="panel story-main">
+          <div class="story-loading" id="story-loading" hidden>
+            <div class="story-loading-spinner" aria-hidden="true"></div>
+            <div>
+              <strong id="story-loading-title">読み込み中</strong>
+              <p id="story-loading-text">LLM を初期化しています。</p>
+            </div>
+          </div>
           <article class="story-result-card" id="story-result-card">
             <div class="story-result-head">
               <p class="kicker">Result</p>
@@ -419,6 +426,10 @@
               <div class="story-result-block">
                 <span>次の指針</span>
                 <p id="story-result-dialogue-hint">-</p>
+              </div>
+              <div class="story-result-block story-result-raw">
+                <span>生出力</span>
+                <p id="story-result-raw">-</p>
               </div>
             </div>
           </article>

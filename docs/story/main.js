@@ -5,11 +5,15 @@ const lineInput = document.getElementById('line-input');
 const statusBadge = document.getElementById('status-badge');
 const nextBeatBadge = document.getElementById('next-beat-badge');
 const llmStatusBadge = document.getElementById('llm-status-badge');
+const storyLoading = document.getElementById('story-loading');
+const storyLoadingTitle = document.getElementById('story-loading-title');
+const storyLoadingText = document.getElementById('story-loading-text');
 const storyResultTitle = document.getElementById('story-result-title');
 const storyResultNarration = document.getElementById('story-result-narration');
 const storyResultNextBeat = document.getElementById('story-result-next-beat');
 const storyResultLoreHits = document.getElementById('story-result-lore-hits');
 const storyResultDialogueHint = document.getElementById('story-result-dialogue-hint');
+const storyResultRaw = document.getElementById('story-result-raw');
 const nextSceneBtn = document.getElementById('next-scene-btn');
 const addLineBtn = document.getElementById('add-line-btn');
 const resetBtn = document.getElementById('reset-btn');
@@ -100,6 +104,27 @@ let storyInitPromise = null;
 let storyRequestSeq = 0;
 let storyPending = new Map();
 let storyReadyModel = null;
+let storyIsBusy = false;
+
+function setStoryBusy(isBusy, title = '読み込み中', text = 'LLM を初期化しています。') {
+  storyIsBusy = isBusy;
+
+  if (storyLoading) {
+    storyLoading.hidden = !isBusy;
+  }
+  if (storyLoadingTitle) {
+    storyLoadingTitle.textContent = title;
+  }
+  if (storyLoadingText) {
+    storyLoadingText.textContent = text;
+  }
+  if (lineInput) {
+    lineInput.disabled = isBusy;
+  }
+  if (addLineBtn) {
+    addLineBtn.disabled = isBusy;
+  }
+}
 
 function createDefaultStorySettings() {
   return {
@@ -436,16 +461,19 @@ async function ensureStoryModelReady() {
   }
 
   setLlmStatus('llm: loading...');
+  setStoryBusy(true, '読み込み中', 'LLM を初期化しています。');
   storyInitPromise = postStoryMessage({
     type: 'init',
     candidates: STORY_MODEL_CANDIDATES,
   })
     .then((msg) => {
       storyReadyModel = msg.modelId;
+      setStoryBusy(false);
       return msg.modelId;
     })
     .catch((error) => {
       setLlmStatus('llm: unavailable');
+      setStoryBusy(false);
       throw error;
     })
     .finally(() => {
@@ -806,6 +834,9 @@ function renderStoryResult(result) {
   if (storyResultDialogueHint) {
     storyResultDialogueHint.textContent = result?.dialogueHint || '-';
   }
+  if (storyResultRaw) {
+    storyResultRaw.textContent = result?.raw || '-';
+  }
 }
 
 function addLog(text, kind) {
@@ -893,6 +924,7 @@ async function generateStoryResponse(input) {
   const prompt = buildStoryPrompt(input);
   renderPromptPreview();
   setLlmStatus('llm: generating...');
+  setStoryBusy(true, '生成中', 'Story を生成しています。');
 
   try {
     await ensureStoryModelReady();
@@ -911,11 +943,13 @@ async function generateStoryResponse(input) {
     renderStoryResult(generated);
     renderHeader();
     renderPromptPreview();
+    setStoryBusy(false);
     setLlmStatus(`llm: ready ${storyReadyModel || 'browser'}`);
   } catch (error) {
     const message = error instanceof Error && error.message ? error.message : '物語の生成に失敗しました。';
     console.error('[lingo] Story generation failed:', error);
     setLlmStatus('llm: error');
+    setStoryBusy(false);
     addLog(`物語の生成に失敗しました。${message}`, 'system');
     renderStoryResult({
       narration: '生成に失敗しました。',
@@ -1089,5 +1123,6 @@ if (state.entries.length === 0) {
 }
 renderStoryResult();
 renderPromptPreview();
+setStoryBusy(false);
 void ensureStoryModelReady();
 saveState();

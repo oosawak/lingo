@@ -356,6 +356,35 @@ h1 {
   flex-wrap: wrap;
 }
 
+.talk-engine-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.talk-engine-button {
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.talk-engine-button.active {
+  border-color: rgba(120, 211, 255, 0.4);
+  background: rgba(120, 211, 255, 0.16);
+  color: var(--text);
+}
+
 .talk-context-description {
   color: var(--muted);
   line-height: 1.7;
@@ -933,6 +962,45 @@ textarea:focus {
   justify-content: flex-end;
 }
 
+.story-loading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(120, 211, 255, 0.18);
+  background: rgba(120, 211, 255, 0.08);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+}
+
+.story-loading strong {
+  display: block;
+  color: var(--accent-2);
+  font-size: 0.98rem;
+}
+
+.story-loading p {
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.story-loading-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(138, 240, 193, 0.26);
+  border-top-color: var(--accent-2);
+  animation: story-spin 0.8s linear infinite;
+  flex: 0 0 auto;
+}
+
+@keyframes story-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .story-result-card {
   margin-top: 18px;
   padding: 16px;
@@ -982,6 +1050,12 @@ textarea:focus {
   line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.story-result-raw p {
+  color: #d7e8ff;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.86rem;
 }
 
 .story-composer {

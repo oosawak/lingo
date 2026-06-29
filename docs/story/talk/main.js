@@ -10,13 +10,16 @@ const talkFlowCloseBtn = document.getElementById('talk-flow-close-btn');
 const talkFlowTitle = document.getElementById('talk-flow-title');
 const talkFlowDescription = document.getElementById('talk-flow-description');
 const talkFlowGrid = document.getElementById('talk-flow-grid');
+const talkEngineButtons = [...document.querySelectorAll('[data-talk-engine]')];
 const STORAGE_KEY = 'lingo.story.talk.log';
+const ENGINE_STORAGE_KEY = 'lingo.story.talk.engine';
 const STORY_STORAGE_KEY = 'lingo.story.state';
 const TALK_MODEL_CANDIDATES = [
   { modelId: 'Xenova/TinyLlama-1.1B-Chat-v1.0', task: 'text-generation' },
   { modelId: 'Xenova/distilgpt2', task: 'text-generation' },
 ];
-const BUILTIN_TALK_MODEL_LABEL = 'Gemini Nano';
+const BUILTIN_TALK_MODEL_LABEL = 'Chrome 内蔵AI (Gemini Nano)';
+const TALK_BACKEND_ORDER = ['builtin', 'worker'];
 
 const builtinAi = globalThis.ai ?? null;
 
@@ -28,6 +31,7 @@ let talkReadyModel = null;
 let talkBackend = null;
 let talkBuiltinSession = null;
 let talkBuiltinInitPromise = null;
+let talkEnginePreference = 'auto';
 
 function loadStorySummary() {
   const state = loadStoryState();
@@ -59,6 +63,43 @@ function setTalkLlmStatus(text) {
   if (talkLlmStatusBadge) {
     talkLlmStatusBadge.textContent = text;
   }
+}
+
+function loadTalkEnginePreference() {
+  try {
+    const raw = window.localStorage.getItem(ENGINE_STORAGE_KEY);
+    return raw === 'worker' || raw === 'builtin' ? raw : 'auto';
+  } catch {
+    return 'auto';
+  }
+}
+
+function saveTalkEnginePreference(preference) {
+  window.localStorage.setItem(ENGINE_STORAGE_KEY, preference);
+}
+
+function getTalkBackendOrder() {
+  if (talkEnginePreference === 'worker') {
+    return ['worker', 'builtin'];
+  }
+  if (talkEnginePreference === 'builtin') {
+    return ['builtin', 'worker'];
+  }
+  return TALK_BACKEND_ORDER;
+}
+
+function syncTalkEngineSelect() {
+  for (const button of talkEngineButtons) {
+    const isActive = button.dataset.talkEngine === talkEnginePreference;
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  }
+}
+
+function resetTalkBackendState() {
+  talkReadyModel = null;
+  talkBackend = null;
+  talkInitPromise = null;
 }
 
 function loadTalkEntries() {
@@ -271,10 +312,10 @@ async function ensureBuiltinTalkModelReady() {
   }
 
   if (!hasBuiltinTalkModel()) {
-    throw new Error('Gemini Nano is not available in this browser');
+    throw new Error('Chrome 内蔵AI (Gemini Nano) is not available in this browser');
   }
 
-  setTalkLlmStatus('llm: loading Gemini Nano...');
+  setTalkLlmStatus('llm: loading Chrome 内蔵AI...');
 
   talkBuiltinInitPromise = (async () => {
     try {
@@ -371,23 +412,33 @@ async function ensureTalkModelReady() {
 
   setTalkLlmStatus('llm: loading...');
   talkInitPromise = (async () => {
-    if (hasBuiltinTalkModel()) {
-      try {
-        await ensureBuiltinTalkModelReady();
-        return talkReadyModel;
-      } catch (error) {
-        console.warn('[lingo] Gemini Nano unavailable, falling back to worker:', error);
+    for (const backend of getTalkBackendOrder()) {
+      if (backend === 'worker') {
+        try {
+          const msg = await postTalkMessage({
+            type: 'init',
+            candidates: TALK_MODEL_CANDIDATES,
+          });
+          talkReadyModel = msg.modelId;
+          talkBackend = 'worker';
+          setTalkLlmStatus(`llm: ready ${msg.modelId}`);
+          return msg.modelId;
+        } catch (error) {
+          console.warn('[lingo] Talk worker unavailable, trying Chrome built-in AI:', error);
+        }
+      }
+
+      if (backend === 'builtin' && hasBuiltinTalkModel()) {
+        try {
+          await ensureBuiltinTalkModelReady();
+          return talkReadyModel;
+        } catch (error) {
+          console.warn('[lingo] Chrome built-in AI unavailable:', error);
+        }
       }
     }
 
-    const msg = await postTalkMessage({
-      type: 'init',
-      candidates: TALK_MODEL_CANDIDATES,
-    });
-    talkReadyModel = msg.modelId;
-    talkBackend = 'worker';
-    setTalkLlmStatus(`llm: ready ${msg.modelId}`);
-    return msg.modelId;
+    throw new Error('No talk model available');
   })()
     .catch((error) => {
       setTalkLlmStatus('llm: unavailable');
@@ -398,6 +449,15 @@ async function ensureTalkModelReady() {
     });
 
   return talkInitPromise;
+}
+
+function applyTalkEnginePreference(nextPreference) {
+  const preference = nextPreference === 'worker' || nextPreference === 'builtin' ? nextPreference : 'auto';
+  talkEnginePreference = preference;
+  saveTalkEnginePreference(preference);
+  syncTalkEngineSelect();
+  resetTalkBackendState();
+  setTalkLlmStatus('llm: idle');
 }
 
 async function generateTalkReply(userInput) {
@@ -653,6 +713,12 @@ talkFlowLayer?.addEventListener('click', (event) => {
   }
 });
 
+for (const button of talkEngineButtons) {
+  button.addEventListener('click', () => {
+    applyTalkEnginePreference(button.dataset.talkEngine || 'auto');
+  });
+}
+
 window.addEventListener('storage', (event) => {
   if (event.key === STORY_STORAGE_KEY) {
     renderStoryContext();
@@ -669,4 +735,5 @@ window.addEventListener('keydown', (event) => {
 renderStoryContext();
 renderTalkEntries();
 renderFlowDrawer();
+applyTalkEnginePreference(loadTalkEnginePreference());
 void ensureTalkModelReady();

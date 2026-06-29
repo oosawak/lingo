@@ -24,6 +24,12 @@
             <h2 id="talk-story-title">失われた街</h2>
           </div>
           <div class="talk-context-actions">
+            <div class="talk-engine-switch" role="group" aria-label="LLM を切り替える">
+              <span>LLM</span>
+              <button class="talk-engine-button active" type="button" data-talk-engine="auto">自動</button>
+              <button class="talk-engine-button" type="button" data-talk-engine="worker">Worker</button>
+              <button class="talk-engine-button" type="button" data-talk-engine="builtin">Chrome 内蔵AI</button>
+            </div>
             <span class="badge badge-secondary" id="talk-llm-status-badge">llm: idle</span>
             <a class="button button-secondary" href="./">選び直す</a>
           </div>
