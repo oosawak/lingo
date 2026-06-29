@@ -4,11 +4,11 @@ env.allowRemoteModels = true;
 env.allowLocalModels = false;
 
 const DEFAULT_CANDIDATES = [
-  { modelId: 'Xenova/Phi-3-mini-4k-instruct_fp16', task: 'text-generation', dtype: 'fp16' },
-  { modelId: 'Xenova/TinyLlama-1.1B-Chat-v1.0', task: 'text-generation', dtype: 'q8' },
-  { modelId: 'Xenova/Qwen2.5-0.5B-Instruct', task: 'text-generation', dtype: 'q8' },
-  { modelId: 'Xenova/mt5-small', task: 'text2text-generation', dtype: 'q8' },
-  { modelId: 'Xenova/flan-t5-small', task: 'text2text-generation', dtype: 'q8' },
+  { modelId: 'microsoft/Phi-3-mini-4k-instruct-onnx-web', task: 'text-generation' },
+  { modelId: 'Xenova/TinyLlama-1.1B-Chat-v1.0', task: 'text-generation' },
+  { modelId: 'Xenova/Qwen2.5-0.5B-Instruct', task: 'text-generation' },
+  { modelId: 'Xenova/mt5-small', task: 'text2text-generation' },
+  { modelId: 'Xenova/flan-t5-small', task: 'text2text-generation' },
 ];
 
 let generator = null;
@@ -54,10 +54,11 @@ self.onmessage = async (event) => {
       for (const candidate of candidates) {
         try {
           const startTime = performance.now();
-          generator = await pipeline(candidate.task, candidate.modelId, {
-            dtype: candidate.dtype || 'q8',
-            device: 'wasm',
-          });
+          const pipelineOptions = { device: 'wasm' };
+          if (candidate.dtype) {
+            pipelineOptions.dtype = candidate.dtype;
+          }
+          generator = await pipeline(candidate.task, candidate.modelId, pipelineOptions);
           generatorModelId = candidate.modelId;
           self.postMessage({
             type: 'ready',

@@ -15,9 +15,9 @@ const STORAGE_KEY = 'lingo.story.talk.log';
 const ENGINE_STORAGE_KEY = 'lingo.story.talk.engine';
 const STORY_STORAGE_KEY = 'lingo.story.state';
 const TALK_MODEL_CANDIDATES = [
-  { modelId: 'Xenova/Phi-3-mini-4k-instruct_fp16', task: 'text-generation', dtype: 'fp16' },
-  { modelId: 'Xenova/TinyLlama-1.1B-Chat-v1.0', task: 'text-generation', dtype: 'q8' },
-  { modelId: 'Xenova/distilgpt2', task: 'text-generation', dtype: 'q8' },
+  { modelId: 'microsoft/Phi-3-mini-4k-instruct-onnx-web', task: 'text-generation' },
+  { modelId: 'Xenova/TinyLlama-1.1B-Chat-v1.0', task: 'text-generation' },
+  { modelId: 'Xenova/distilgpt2', task: 'text-generation' },
 ];
 const BUILTIN_TALK_MODEL_LABEL = 'Chrome 内蔵AI (Gemini Nano)';
 const TALK_BACKEND_ORDER = ['builtin', 'worker'];
