@@ -4,7 +4,7 @@ env.allowRemoteModels = true;
 env.allowLocalModels = false;
 
 const DEFAULT_CANDIDATES = [
-  { modelId: 'microsoft/Phi-3-mini-4k-instruct-onnx-web', task: 'text-generation' },
+  { modelId: 'onnx-community/Phi-4-mini-instruct-ONNX-GQA', task: 'text-generation' },
   { modelId: 'Xenova/TinyLlama-1.1B-Chat-v1.0', task: 'text-generation' },
   { modelId: 'Xenova/Qwen2.5-0.5B-Instruct', task: 'text-generation' },
   { modelId: 'Xenova/mt5-small', task: 'text2text-generation' },
