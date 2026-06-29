@@ -21,7 +21,7 @@ const TALK_MODEL_CANDIDATES = [
 const BUILTIN_TALK_MODEL_LABEL = 'Chrome 内蔵AI (Gemini Nano)';
 const TALK_BACKEND_ORDER = ['builtin', 'worker'];
 
-const builtinAi = globalThis.ai ?? null;
+const builtinAi = globalThis.ai ?? window.ai ?? null;
 
 let talkWorker = null;
 let talkInitPromise = null;
@@ -80,10 +80,10 @@ function saveTalkEnginePreference(preference) {
 
 function getTalkBackendOrder() {
   if (talkEnginePreference === 'worker') {
-    return ['worker', 'builtin'];
+    return ['worker'];
   }
   if (talkEnginePreference === 'builtin') {
-    return ['builtin', 'worker'];
+    return ['builtin'];
   }
   return TALK_BACKEND_ORDER;
 }
@@ -300,6 +300,26 @@ function hasBuiltinTalkModel() {
   return Boolean(window.isSecureContext && builtinAi?.languageModel?.create);
 }
 
+function getBuiltinTalkAvailabilityReason() {
+  if (!window.isSecureContext) {
+    return 'Chrome 内蔵AI は HTTPS / localhost でのみ使えます';
+  }
+
+  if (!builtinAi) {
+    return 'この Chrome では built-in AI API が見つかりません';
+  }
+
+  if (!builtinAi.languageModel) {
+    return 'languageModel API が見つかりません';
+  }
+
+  if (typeof builtinAi.languageModel.create !== 'function') {
+    return 'languageModel.create が利用できません';
+  }
+
+  return '';
+}
+
 async function ensureBuiltinTalkModelReady() {
   if (talkBuiltinSession) {
     talkBackend = 'builtin';
@@ -312,7 +332,7 @@ async function ensureBuiltinTalkModelReady() {
   }
 
   if (!hasBuiltinTalkModel()) {
-    throw new Error('Chrome 内蔵AI (Gemini Nano) is not available in this browser');
+    throw new Error(getBuiltinTalkAvailabilityReason() || 'Chrome 内蔵AI (Gemini Nano) is not available in this browser');
   }
 
   setTalkLlmStatus('llm: loading Chrome 内蔵AI...');
@@ -424,7 +444,7 @@ async function ensureTalkModelReady() {
           setTalkLlmStatus(`llm: ready ${msg.modelId}`);
           return msg.modelId;
         } catch (error) {
-          console.warn('[lingo] Talk worker unavailable, trying Chrome built-in AI:', error);
+          console.warn('[lingo] Talk worker unavailable:', error);
         }
       }
 
@@ -436,6 +456,10 @@ async function ensureTalkModelReady() {
           console.warn('[lingo] Chrome built-in AI unavailable:', error);
         }
       }
+    }
+
+    if (talkEnginePreference === 'builtin') {
+      throw new Error(getBuiltinTalkAvailabilityReason() || 'Chrome 内蔵AI is not available in this browser');
     }
 
     throw new Error('No talk model available');
