@@ -1,3 +1,5 @@
+import { addCustomStory, getStoryStateKey } from './catalog.js';
+
 const storyLog = document.getElementById('story-log');
 const chapterLabel = document.getElementById('chapter-label');
 const sceneLabel = document.getElementById('scene-label');
@@ -18,6 +20,7 @@ const nextSceneBtn = document.getElementById('next-scene-btn');
 const addLineBtn = document.getElementById('add-line-btn');
 const resetBtn = document.getElementById('reset-btn');
 const plotResetBtn = document.getElementById('plot-reset-btn');
+const storyAddBtn = document.getElementById('story-add-btn');
 const plotTitle = document.getElementById('plot-title');
 const plotPremise = document.getElementById('plot-premise');
 const plotRules = document.getElementById('plot-rules');
@@ -92,6 +95,7 @@ const tabPanels = [...document.querySelectorAll('[data-story-panel]')];
 const STORY_TABS = new Set(tabButtons.map((button) => button.dataset.storyTab).filter(Boolean));
 
 const STORAGE_KEY = 'lingo.story.state';
+const STORY_STATE_KEY_PREFIX = 'lingo.story.state';
 const STORY_MODEL_CANDIDATES = [
   { modelId: 'onnx-community/Phi-4-mini-instruct-ONNX-GQA', task: 'text-generation' },
   { modelId: 'Xenova/TinyLlama-1.1B-Chat-v1.0', task: 'text-generation' },
@@ -293,6 +297,18 @@ function createDefaultState() {
   };
 }
 
+function getCurrentStoryId() {
+  try {
+    return window.localStorage.getItem('lingo.story.active') || 'lost-city';
+  } catch {
+    return 'lost-city';
+  }
+}
+
+function getCurrentStoryStateKey() {
+  return getStoryStateKey(getCurrentStoryId());
+}
+
 function createPlot(title, description) {
   const plotTitle = title || '失われた街';
   const premise = description?.trim()
@@ -314,7 +330,7 @@ function createPlot(title, description) {
 
 function loadState() {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(getCurrentStoryStateKey()) || window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       return createDefaultState();
     }
@@ -380,7 +396,36 @@ const state = {
 };
 
 function saveState() {
+  const key = getCurrentStoryStateKey();
+  window.localStorage.setItem(key, JSON.stringify(state));
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function slugifyStoryId(text) {
+  return String(text ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9ぁ-んァ-ヶ一-龠々]+/g, '-')
+    .replace(/^-+|-+$/g, '') || `story-${Date.now()}`;
+}
+
+function addCurrentStoryToCatalog() {
+  const title = (state.storySettings?.summary?.title || state.plot?.title || state.theme || '無題').trim();
+  const description = (state.storySettings?.summary?.description || state.plot?.premise || state.description || '').trim();
+  const id = `${slugifyStoryId(title)}-${Date.now().toString(36)}`;
+
+  addCustomStory({
+    id,
+    title,
+    description: description || 'ユーザーが作成した物語',
+    thumbClass: 'feed-thumb-a',
+    storyTheme: title,
+    storyDescription: description || 'ユーザーが作成した物語',
+  });
+
+  window.localStorage.setItem('lingo.story.active', id);
+  window.localStorage.setItem(getStoryStateKey(id), JSON.stringify(state));
+  saveState();
+  return id;
 }
 
 function setLlmStatus(text) {
@@ -1130,5 +1175,11 @@ if (state.entries.length === 0) {
 renderStoryResult();
 renderPromptPreview();
 setStoryBusy(false);
-void ensureStoryModelReady();
 saveState();
+
+storyAddBtn?.addEventListener('click', () => {
+  addCurrentStoryToCatalog();
+  if (storyLog) {
+    addLog('現在の物語を新規ストーリーとして追加しました。', 'system');
+  }
+});

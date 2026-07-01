@@ -25,12 +25,57 @@ export const STORY_CATALOG = [
   },
 ];
 
+const STORY_ACTIVE_KEY = 'lingo.story.active';
+const STORY_STATE_KEY_PREFIX = 'lingo.story.state';
+const STORY_CUSTOM_CATALOG_KEY = 'lingo.story.customCatalog';
+
 export function getActiveStoryId() {
   try {
-    return window.localStorage.getItem('lingo.story.active') || '';
+    return window.localStorage.getItem(STORY_ACTIVE_KEY) || '';
   } catch {
     return '';
   }
+}
+
+export function getStoryStateKey(storyId) {
+  return `${STORY_STATE_KEY_PREFIX}:${storyId || 'default'}`;
+}
+
+function loadCustomStoryCatalog() {
+  try {
+    const raw = window.localStorage.getItem(STORY_CUSTOM_CATALOG_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+
+    return Array.isArray(parsed)
+      ? parsed.filter((item) => item && typeof item === 'object' && typeof item.id === 'string')
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomStoryCatalog(stories) {
+  window.localStorage.setItem(STORY_CUSTOM_CATALOG_KEY, JSON.stringify(stories));
+}
+
+function normalizeCatalogStory(story) {
+  const id = typeof story?.id === 'string' && story.id.trim() ? story.id.trim() : '';
+  const title = typeof story?.title === 'string' && story.title.trim() ? story.title.trim() : '無題';
+  const description = typeof story?.description === 'string' && story.description.trim() ? story.description.trim() : '';
+  const storyTheme = typeof story?.storyTheme === 'string' && story.storyTheme.trim() ? story.storyTheme.trim() : title;
+  const storyDescription = typeof story?.storyDescription === 'string' && story.storyDescription.trim()
+    ? story.storyDescription.trim()
+    : description;
+
+  return {
+    id,
+    title,
+    description,
+    thumbClass: typeof story?.thumbClass === 'string' && story.thumbClass.trim() ? story.thumbClass.trim() : 'feed-thumb-a',
+    storyTheme,
+    storyDescription,
+    isCustom: true,
+  };
 }
 
 export function createStoryCard(story, options = {}) {
@@ -143,31 +188,22 @@ export function createStoryListItem(story, options = {}) {
 }
 
 export function getStoryCatalog() {
-  try {
-    const raw = window.localStorage.getItem('lingo.story.state');
-    const state = raw ? JSON.parse(raw) : null;
-    const title = (state?.storySettings?.summary?.title || state?.plot?.title || state?.theme || '').trim();
-    const description = (state?.storySettings?.summary?.description || state?.plot?.premise || state?.description || '').trim();
-
-    return STORY_CATALOG.map((item, index) => {
-      if (index !== 0 || !title) {
-        return item;
-      }
-
-      return {
-        ...item,
-        title,
-        description: description || item.description,
-        storyTheme: title,
-        storyDescription: description || item.storyDescription,
-      };
-    });
-  } catch {
-    return STORY_CATALOG;
-  }
+  return [
+    ...STORY_CATALOG,
+    ...loadCustomStoryCatalog().map(normalizeCatalogStory),
+  ];
 }
 
 export function setActiveStory(story) {
+  const storyId = typeof story?.id === 'string' && story.id.trim() ? story.id.trim() : '';
+  const stateKey = getStoryStateKey(storyId);
+  const existingRaw = storyId ? window.localStorage.getItem(stateKey) : '';
+
+  if (existingRaw) {
+    window.localStorage.setItem(STORY_ACTIVE_KEY, storyId);
+    return;
+  }
+
   const nextState = {
     chapter: 1,
     scene: 1,
@@ -199,6 +235,21 @@ export function setActiveStory(story) {
     },
   };
 
-  window.localStorage.setItem('lingo.story.state', JSON.stringify(nextState));
-  window.localStorage.setItem('lingo.story.active', story.id);
+  if (storyId) {
+    window.localStorage.setItem(stateKey, JSON.stringify(nextState));
+    window.localStorage.setItem(STORY_ACTIVE_KEY, storyId);
+  }
+}
+
+export function addCustomStory(story) {
+  const item = normalizeCatalogStory(story);
+  if (!item.id) {
+    throw new Error('Custom story must have an id');
+  }
+
+  const current = loadCustomStoryCatalog();
+  const next = current.filter((entry) => entry.id !== item.id);
+  next.unshift(item);
+  saveCustomStoryCatalog(next);
+  return item;
 }

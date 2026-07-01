@@ -16,8 +16,18 @@
         <div class="story-picker-engine">
           <span>LLM</span>
           <button class="talk-engine-button active" type="button" data-talk-engine="auto">自動</button>
+          <button class="talk-engine-button" type="button" data-talk-engine="ollama">Ollama</button>
           <button class="talk-engine-button" type="button" data-talk-engine="worker">Worker</button>
           <button class="talk-engine-button" type="button" data-talk-engine="builtin">Chrome 内蔵AI</button>
+        </div>
+        <div class="talk-ollama-config">
+          <label for="talk-ollama-base-url">Ollama URL</label>
+          <input id="talk-ollama-base-url" type="url" placeholder="http://localhost:11434" />
+          <button id="talk-ollama-save" type="button" class="talk-engine-button">保存</button>
+          <label for="talk-ollama-model">Ollama Model</label>
+          <select id="talk-ollama-model">
+            <option value="">読み込み中...</option>
+          </select>
         </div>
       </section>
 

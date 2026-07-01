@@ -30,6 +30,8 @@
               <button class="talk-engine-button" type="button" data-talk-engine="worker">Worker</button>
               <button class="talk-engine-button" type="button" data-talk-engine="builtin">Chrome 内蔵AI</button>
             </div>
+            <button class="button button-primary" id="talk-start-btn" type="button">TALK を起動</button>
+            <button class="button button-secondary" id="talk-reset-btn" type="button">最初から</button>
             <span class="badge badge-secondary" id="talk-llm-status-badge">llm: idle</span>
             <a class="button button-secondary" href="./">選び直す</a>
           </div>
@@ -58,6 +60,7 @@
     </section>
 
     <div class="talk-dock">
+      <div class="talk-progress" id="talk-progress-text" aria-live="polite">AI 状況: 待機中</div>
       <div class="talk-composer">
         <label class="field talk-field" for="talk-input">
           <span>Talk</span>

@@ -102,7 +102,7 @@ self.onmessage = async (event) => {
 
       try {
         const result = await generator(msg.prompt, {
-          max_new_tokens: msg.maxNewTokens ?? 96,
+          max_new_tokens: msg.maxNewTokens ?? 512,
           do_sample: true,
           temperature: 0.8,
           top_p: 0.9,
